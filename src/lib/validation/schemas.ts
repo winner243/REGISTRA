@@ -10,8 +10,10 @@ import { z } from "zod"
 
 /** Adresse email simple mais stricte. */
 export const emailSchema = z
+  .string({ message: "Adresse email invalide." })
+  .trim()
+  .toLowerCase()
   .email({ message: "Adresse email invalide." })
-  .transform((value) => value.trim().toLowerCase())
 
 /** Nom d'une personne ou d'une entité (texte lisible). */
 export const nameSchema = z
