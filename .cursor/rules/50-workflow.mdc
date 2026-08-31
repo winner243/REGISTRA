@@ -1,0 +1,71 @@
+---
+description: Workflow, simplicité, dépendances, architecture, vérifications avant/après modification, règles Git, communication et non-régression.
+alwaysApply: true
+---
+
+# Workflow et maintenabilité
+
+## Code simple et maintenable
+
+- Fonctions courtes, composants compréhensibles, noms explicites.
+- Responsabilités séparées, logique réutilisable, architecture claire.
+- Évite : abstraction inutile, complexité excessive, fonctions/composants géants, duplication, logique métier mélangée à l'UI quand on peut l'éviter.
+- Ne crée pas d'architecture complexe pour anticiper un problème hypothétique.
+
+## Ne pas installer de bibliothèques inutiles
+
+Avant d'ajouter une dépendance, vérifie si :
+
+1. le projet possède déjà une solution ;
+2. Next.js fournit déjà la fonctionnalité ;
+3. React la fournit déjà ;
+4. shadcn/ui ou Tailwind permet de résoudre le besoin ;
+5. une petite fonction interne suffit.
+
+Si une nouvelle bibliothèque est réellement nécessaire : explique pourquoi, vérifie la compatibilité, évite les bibliothèques abandonnées et les doublons fonctionnels, installe uniquement ce qui est nécessaire.
+
+## Ne pas modifier inutilement l'architecture
+
+Modifie uniquement ce qui est nécessaire. Avant une modification importante, analyse le code existant, identifie les dépendances, évite les refactorings massifs inutiles, préserve les fonctionnalités existantes. Ne réécris pas toute une fonctionnalité pour un petit problème.
+
+## Avant de modifier du code
+
+1. Analyse le code existant et comprends l'architecture.
+2. Recherche les composants et fonctions réutilisables.
+3. Vérifie les dépendances et identifie les risques de régression.
+4. Ensuite seulement, modifie le code.
+
+## Après chaque modification importante
+
+Vérifie autant que nécessaire :
+
+- `pnpm lint`
+- `pnpm build`
+
+Lorsqu'une modification touche TypeScript, les routes, l'authentification ou l'architecture, effectue les vérifications appropriées. **Corrige les erreurs au lieu de les masquer.** Ne désactive JAMAIS ESLint ou TypeScript pour obtenir un build vert.
+
+## Performance
+
+- Évite les requêtes/rendus inutiles et les appels réseau inutiles.
+- Ne charge pas de bibliothèque lourde sans raison ; optimise les images.
+- Utilise correctement Server Components et Client Components ; ne mets pas `"use client"` sans nécessité.
+- Pagine les grandes listes lorsque nécessaire.
+- Ne sur-optimise pas prématurément au détriment de la simplicité.
+
+## Git
+
+- Ne fais **jamais** `git commit` / `git push` automatiquement sans instruction explicite.
+- Tu peux analyser `git status` et indiquer les modifications, mais le commit/push restent sous contrôle de l'utilisateur.
+- Vérifie que `.env.local` et les secrets ne sont pas commités.
+
+## Communication avec l'utilisateur
+
+L'utilisateur est **débutant en programmation**. En cas de problème important : explique brièvement le problème, indique ce qui le provoque, propose une solution, puis applique-la lorsque c'est sans risque. Ne cache pas les erreurs. Ne prétends jamais qu'une fonctionnalité fonctionne si elle n'a pas été vérifiée.
+
+## Opérations dangereuses
+
+Avant toute opération destructive (suppression importante, migration destructive, modification de base de données, suppression de fichiers importants, changement majeur de dépendances), **arrête-toi et demande confirmation** si l'opération risque une perte de données ou une régression importante. Ne supprime jamais arbitrairement du code existant sans raison.
+
+## Non-régression
+
+Toute nouvelle fonctionnalité doit préserver les fonctionnalités existantes. Avant de terminer une tâche, vérifie lorsque pertinent : Landing page, Pricing, Auth, Dashboard, Settings, Profile, Billing, Account, Navbar, Sidebar, Supabase, composants d'état.

@@ -1,0 +1,54 @@
+---
+description: Conventions frontend : shadcn/ui, réutilisation des composants, Tailwind, mobile-first, accessibilité, cohérence du design system.
+alwaysApply: false
+globs: ["**/*.tsx", "**/*.jsx", "**/*.css"]
+---
+
+# Frontend et composants
+
+## Réutiliser avant de créer
+
+Avant de créer un composant, dans l'ordre :
+
+1. Recherche s'il existe déjà dans `src/components/`.
+2. Vérifie s'il peut être réutilisé tel quel.
+3. Vérifie s'il peut être rendu **configurable** (props) plutôt que dupliqué.
+4. Ne crée un nouveau composant que si aucune option ci-dessus ne convient.
+
+**Interdiction** de créer plusieurs composants ayant exactement le même objectif. Ex. ne crée pas `LoadingSpinner` + `LoadingIndicator` + `LoadingState` pour la même chose — réutilise l'existant.
+
+## shadcn/ui
+
+- Utilise **shadcn/ui** lorsqu'un composant adapté existe déjà (`src/components/ui/`).
+- Personnalise les composants existants lorsque nécessaire ; ne recrée pas un composant déjà disponible.
+- Respecte le design system.
+
+## Tailwind CSS
+
+- Utilise **Tailwind CSS** pour le styling, avec les classes existantes.
+- Respecte les **tokens du design system** (couleurs, spacing, radius, typographie) — aucune couleur arbitraire.
+- Évite les styles inline inutiles et les fichiers CSS spécifiques sans nécessité.
+- N'introduis pas d'autre solution CSS sans raison.
+
+## Design system
+
+Les nouvelles interfaces doivent respecter :
+
+- le branding configurable (`src/config/brand.ts`)
+- Tailwind + tokens existants
+- shadcn/ui + composants existants
+- le responsive design existant
+
+Ne crée pas un style visuel indépendant pour chaque page. Réutilise le layout global (`src/components/layout/`).
+
+## Mobile-first
+
+Construis **mobile-first** (360px+), puis adapte pour tablette (768px) et desktop (1280px+). Vérifie : navigation, formulaires, tableaux, cartes, Dialog, Sidebar, Navbar, Dashboard. Évite les débordements horizontaux inutiles.
+
+## Accessibilité (obligatoire)
+
+- Labels pour les champs, boutons accessibles.
+- Navigation clavier, focus visible.
+- Contraste suffisant.
+- ARIA uniquement lorsque nécessaire ; utilise d'abord les éléments HTML sémantiques.
+- Dialog accessible, messages d'erreur accessibles, états de chargement accessibles.

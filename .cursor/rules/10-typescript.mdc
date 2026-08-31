@@ -1,0 +1,15 @@
+---
+description: Conventions TypeScript du projet (types explicites, interdiction du any, config strict).
+alwaysApply: false
+globs: ["**/*.ts", "**/*.tsx", "**/*.mts"]
+---
+
+# TypeScript
+
+- Utilise **TypeScript** pour tout nouveau code. Évite JavaScript lorsqu'un fichier `.ts`/`.tsx` est approprié.
+- Utilise des **types explicites** lorsque nécessaire (props de composants, signatures de fonctions publiques, données externes).
+- **Évite `any`**. Préfère des types précis : `unknown` si tu ne connais pas encore le type, sinon déduis-le ou définis-le.
+- Ne **jamais** désactiver TypeScript (ex. `// @ts-ignore`, cast abusif en `any`) pour contourner une erreur.
+- Ne demande pas de typer artificiellement chaque ligne : si l'inférence TypeScript est suffisante et lisible, laisse-la faire.
+- Objectif : TypeScript **strict et lisible**.
+- Respecte la config existante (`tsconfig.json`, `"strict": true`) et les chemins d'alias `@/*` → `src/*`.

@@ -1,0 +1,51 @@
+---
+description: Sécurité, secrets, validation serveur, intégration Supabase et règles de base de données.
+alwaysApply: false
+globs: ["**/*.ts", "**/*.tsx", "**/*.mts", ".env*"]
+---
+
+# Sécurité, Supabase et données
+
+## Secrets — jamais exposés
+
+Interdiction absolue de :
+
+- hardcoder des clés secrètes ou mots de passe dans le code ;
+- commiter des tokens, service role key, ou clés dans Git ;
+- exposer une **service role key côté client** ;
+- mettre des secrets dans les fichiers publics ou dans `.env.example` ;
+- créer une variable `NEXT_PUBLIC_*` pour une clé qui doit rester **secrète**.
+
+Les secrets sont gérés par les variables d'environnement appropriées (`.env.local`, jamais commité). Vérifie que `.env.local` et les secrets Supabase ne sont pas ajoutés au commit.
+
+`.env.example` ne contient que les **noms** des variables attendues (valeurs vides), jamais de vraies valeurs.
+
+## Validation côté serveur
+
+Les données venant du client ne sont **jamais fiables**. Lorsque nécessaire :
+
+- valide les entrées **côté serveur** ;
+- vérifie les **permissions** et **l'authentification** côté serveur ;
+- valide les données avant leur enregistrement ;
+- ne dépend jamais uniquement d'une validation frontend pour la sécurité.
+
+Le frontend peut améliorer l'UX, mais la validation de sécurité doit être effectué côté serveur.
+
+## Supabase
+
+- **Réutilise les clients existants** : `src/lib/supabase/client.ts` (navigateur) et `src/lib/supabase/server.ts` (serveur). Ne crée PAS plusieurs clients inutilement par fonctionnalité.
+- Utilise correctement le client navigateur vs serveur, en respectant `@supabase/ssr`.
+- Ne **jamais** exposer de clé secrète ni utiliser le service role côté navigateur.
+- Utilise les mécanismes de sécurité Supabase appropriés.
+- Ne crée PAS une nouvelle architecture Supabase pour chaque fonctionnalité.
+
+## Base de données (futures fonctionnalités)
+
+Lorsqu'une fonctionnalité utilise Supabase/PostgreSQL :
+
+- conçois les tables proprement ; évite la duplication inutile ;
+- ajoute les **index** et la **pagination** lorsque nécessaire ;
+- utilise des **contraintes** appropriées et la **Row Level Security** lorsque nécessaire ;
+- ne fais jamais confiance uniquement au frontend pour la sécurité.
+
+Ne crée pas encore de nouvelles tables métier dans cette phase.

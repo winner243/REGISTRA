@@ -1,0 +1,40 @@
+---
+description: Principes fondamentaux du SaaS Starter, priorités et contraintes applicables à toute modification.
+alwaysApply: true
+---
+
+# Règles de base du SaaS Starter
+
+## Contexte du projet
+
+Ce projet est un **SaaS Starter générique** (Next.js App Router, TypeScript, Tailwind CSS 4, shadcn/ui, Supabase). Le code doit rester générique et réutilisable : il ne doit PAS être spécialisé pour un métier ou un produit particulier.
+
+## Principes fondamentaux
+
+Le code doit être :
+
+- **simple** — minimal, sans complexité inutile
+- **modulaire** — responsabilités clairement séparées
+- **réutilisable** — composants et logique partagés
+- **maintenable** — lisible et facile à faire évoluer
+- **sécurisé** — les secrets et données ne sont jamais exposés
+- **accessible** — utilisable au clavier, RV + contraste, ARIA pertinent
+- **responsive** — fonctionne de 360px mobile jusqu'au desktop
+- **évolutif** — capable de passer à l'échelle, sans sur-ingénierie
+
+## Priorités en cas de conflit entre règles
+
+1. Sécurité
+2. Fonctionnement correct
+3. Intégrité des données
+4. Accessibilité
+5. Maintenabilité
+6. Performance
+7. Cohérence du design
+8. Simplicité
+
+Ne sacrifie **jamais** la sécurité pour gagner quelques lignes de code.
+
+## Ce que ce Starter n'est pas
+
+Ne crée PAS de logique métier (réservation, immobilier, paiements, CRM, analytics métier, notifications, rôles complexes…) sauf demande explicite. Ce Starter ne concerne que des fondations UX génériques et réutilisables.

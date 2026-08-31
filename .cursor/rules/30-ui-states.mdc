@@ -1,0 +1,36 @@
+---
+description: Gestion des états UI (Loading, Empty, Error, Success, Unauthorized, Not Found) et des erreurs, avec les composants réutilisables de la Phase 9.
+alwaysApply: false
+globs: ["**/*.tsx", "**/*.ts"]
+---
+
+# États UI et gestion des erreurs
+
+## États UI obligatoires
+
+Pour toute interface qui récupère ou manipule des données, pense systématiquement aux états : **Loading, Empty, Error, Success, Unauthorized, Not Found**.
+
+**Réutilise les composants de la Phase 9** (`src/components/states/`, exportés via l'index) au lieu d'en recréer :
+
+- `LoadingState`
+- `EmptyState`
+- `ErrorState`
+- `SuccessMessage`
+- `ConfirmDialog`
+- `Unauthorized`
+
+Ne crée pas de nouveaux composants d'état sans nécessité.
+
+## Gestion des erreurs
+
+- Ne **jamais** ignorer silencieusement les erreurs.
+- Affiche un **message utilisateur compréhensible**.
+- Conserve les **détails techniques hors de l'interface** (logs via `console.error` côté client ou mécanismes adaptés, jamais affichés à l'utilisateur).
+- Prévois une **action de récupération** (ex. bouton « Réessayer ») lorsque pertinente.
+
+**Ne jamais afficher** dans l'UI : stack trace, secrets, tokens, ou informations internes sensibles.
+
+## Fichiers Next.js
+
+- `not-found.tsx` (404) et `unauthorized.tsx` (401) / `forbidden.tsx` (403) au niveau `src/app/` pour les états globaux.
+- `loading.tsx` et `error.tsx` uniquement là où ils améliorent réellement l'expérience — pas partout inutilement.
