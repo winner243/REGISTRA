@@ -25,6 +25,7 @@ plusieurs futurs SaaS.
 16. [Sécurité](#sécurité)
 17. [Sauvegardes](#sauvegardes)
 18. [Contribution / workflow Git](#contribution--workflow-git)
+19. [Créer un nouveau SaaS (SaaS Factory)](#créer-un-nouveau-saas-saas-factory)
 
 ---
 
@@ -303,10 +304,30 @@ nécessite une action manuelle de ta part sur le tableau de bord Supabase.
 
 ---
 
+## Créer un nouveau SaaS (SaaS Factory)
+
+Ce Starter est une **fondation réutilisable** : il permet de créer plusieurs SaaS
+indépendants (location, PlanForge, Registra…), chacun avec son propre branding, son
+propre projet Supabase, ses propres variables et son propre déploiement.
+
+Le processus officiel et la checklist complète sont documentés dans
+[`documentation/saas-factory.md`](documentation/saas-factory.md).
+
+**Principes clés :**
+
+- chaque nouveau SaaS est un **repository indépendant** avec un **projet Supabase
+  distinct** ;
+- on **réutilise** la fondation (UI, auth, validation, tests, CI) mais pas les
+  secrets, données, credentials ni utilisateurs ;
+- le Starter reste générique : on ne le transforme pas en un SaaS métier.
+
+---
+
 ## Références documentaires
 
 | Sujet | Fichier |
 | --- | --- |
+| **Créer un nouveau SaaS** | [`documentation/saas-factory.md`](documentation/saas-factory.md) |
 | Architecture | [`documentation/architecture.md`](documentation/architecture.md) |
 | Base de données | [`documentation/database.md`](documentation/database.md) |
 | Sécurité | [`documentation/security.md`](documentation/security.md) |
