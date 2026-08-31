@@ -5,6 +5,13 @@ import { redirect } from "next/navigation"
 
 import { isSupabaseConfigured } from "@/lib/supabase/env"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
+import { getFirstErrorMessage } from "@/lib/validation"
+import {
+  forgotPasswordSchema,
+  loginSchema,
+  resetPasswordSchema,
+  signUpSchema,
+} from "@/lib/auth/schemas"
 
 export type AuthResult = {
   error?: string
@@ -12,13 +19,6 @@ export type AuthResult = {
 }
 
 export type AuthState = AuthResult | null
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const MIN_PASSWORD_LENGTH = 8
-
-function isValidEmail(value: string): boolean {
-  return EMAIL_PATTERN.test(value)
-}
 
 async function getBaseUrl(): Promise<string> {
   const headerStore = await headers()
@@ -36,14 +36,13 @@ export async function login(
   _prevState: AuthState,
   formData: FormData
 ): Promise<AuthResult> {
-  const email = String(formData.get("email") ?? "").trim().toLowerCase()
-  const password = String(formData.get("password") ?? "")
+  const parsed = loginSchema.safeParse({
+    email: String(formData.get("email") ?? ""),
+    password: String(formData.get("password") ?? ""),
+  })
 
-  if (!email || !isValidEmail(email)) {
-    return { error: "Adresse email invalide." }
-  }
-  if (!password) {
-    return { error: "Le mot de passe est requis." }
+  if (!parsed.success) {
+    return { error: getFirstErrorMessage(parsed) ?? "Données invalides." }
   }
 
   const supabase = await getClient()
@@ -52,8 +51,8 @@ export async function login(
   }
 
   const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
+    email: parsed.data.email,
+    password: parsed.data.password,
   })
 
   if (error) {
@@ -67,20 +66,14 @@ export async function signUp(
   _prevState: AuthState,
   formData: FormData
 ): Promise<AuthResult> {
-  const email = String(formData.get("email") ?? "").trim().toLowerCase()
-  const password = String(formData.get("password") ?? "")
-  const confirmPassword = String(formData.get("confirmPassword") ?? "")
+  const parsed = signUpSchema.safeParse({
+    email: String(formData.get("email") ?? ""),
+    password: String(formData.get("password") ?? ""),
+    confirmPassword: String(formData.get("confirmPassword") ?? ""),
+  })
 
-  if (!email || !isValidEmail(email)) {
-    return { error: "Adresse email invalide." }
-  }
-  if (password.length < MIN_PASSWORD_LENGTH) {
-    return {
-      error: `Le mot de passe doit contenir au moins ${MIN_PASSWORD_LENGTH} caractères.`,
-    }
-  }
-  if (password !== confirmPassword) {
-    return { error: "Les mots de passe ne correspondent pas." }
+  if (!parsed.success) {
+    return { error: getFirstErrorMessage(parsed) ?? "Données invalides." }
   }
 
   const supabase = await getClient()
@@ -88,7 +81,10 @@ export async function signUp(
     return { error: "Supabase n'est pas configuré sur ce projet." }
   }
 
-  const { data, error } = await supabase.auth.signUp({ email, password })
+  const { data, error } = await supabase.auth.signUp({
+    email: parsed.data.email,
+    password: parsed.data.password,
+  })
 
   if (error) {
     return {
@@ -115,10 +111,12 @@ export async function forgotPassword(
   _prevState: AuthState,
   formData: FormData
 ): Promise<AuthResult> {
-  const email = String(formData.get("email") ?? "").trim().toLowerCase()
+  const parsed = forgotPasswordSchema.safeParse({
+    email: String(formData.get("email") ?? ""),
+  })
 
-  if (!email || !isValidEmail(email)) {
-    return { error: "Adresse email invalide." }
+  if (!parsed.success) {
+    return { error: getFirstErrorMessage(parsed) ?? "Données invalides." }
   }
 
   const supabase = await getClient()
@@ -126,7 +124,7 @@ export async function forgotPassword(
     return { error: "Supabase n'est pas configuré sur ce projet." }
   }
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
     redirectTo: `${await getBaseUrl()}/reset-password`,
   })
 
@@ -146,16 +144,13 @@ export async function resetPassword(
   _prevState: AuthState,
   formData: FormData
 ): Promise<AuthResult> {
-  const password = String(formData.get("password") ?? "")
-  const confirmPassword = String(formData.get("confirmPassword") ?? "")
+  const parsed = resetPasswordSchema.safeParse({
+    password: String(formData.get("password") ?? ""),
+    confirmPassword: String(formData.get("confirmPassword") ?? ""),
+  })
 
-  if (password.length < MIN_PASSWORD_LENGTH) {
-    return {
-      error: `Le mot de passe doit contenir au moins ${MIN_PASSWORD_LENGTH} caractères.`,
-    }
-  }
-  if (password !== confirmPassword) {
-    return { error: "Les mots de passe ne correspondent pas." }
+  if (!parsed.success) {
+    return { error: getFirstErrorMessage(parsed) ?? "Données invalides." }
   }
 
   const supabase = await createSupabaseServerClient()
@@ -163,7 +158,9 @@ export async function resetPassword(
     return { error: "Supabase n'est pas configuré sur ce projet." }
   }
 
-  const { error } = await supabase.auth.updateUser({ password })
+  const { error } = await supabase.auth.updateUser({
+    password: parsed.data.password,
+  })
 
   if (error) {
     return { error: "Impossible de mettre à jour le mot de passe. Réessaie." }
