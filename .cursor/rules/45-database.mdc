@@ -1,0 +1,42 @@
+---
+description: Règles Supabase et base de données : RLS, moindre privilège, migrations, pas de tables métier arbitraires dans le Starter.
+alwaysApply: false
+globs: ["**/*.ts", "**/*.tsx", "**/*.sql"]
+---
+
+# Base de données / Supabase
+
+## Clients réutilisables
+
+- Réutilise **uniquement** `src/lib/supabase/client.ts` (navigateur) et `src/lib/supabase/server.ts` (serveur).
+- Ne crée pas de nouveau client par fonctionnalité.
+- Utilise le client naviguer uniquement dans les composants Client ; le client serveur exclusivement côté serveur (`@supabase/ssr`).
+
+## Moindre privilège
+
+- Utilise uniquement la clé **publishable** (publique) côté navigateur.
+- N'expose **jamais** la clé `service_role` (privilégiée) côté navigateur ni dans le code client.
+- Ne donne pas à un outil/accès plus de permissions que nécessaire.
+
+## Row Level Security (RLS)
+
+- Toute nouvelle table doit être protégée par **RLS**.
+- Les politiques doivent être les plus restrictives possibles (respecter `auth.uid()`, ownership).
+- Ne fais **jamais** confiance au client : l'autorisation se vérifie aussi côté serveur.
+- Valide les entrées côté serveur avant tout accès/écriture.
+
+## Migrations
+
+- Ne modifie **jamais** la structure de la base sans **migration**.
+- Aucun changement de schéma ad hoc dans le code applicatif.
+- Toute migration doit être **versionnée** et **reproductible**.
+
+## Pas de tables métier arbitraires dans le Starter
+
+- Le Starter est une fondation générique : ne crée pas de tables métier (réservation, paiements, CRM, analytics…) dans cette base.
+- La structure générique (profils, auth) ne doit pas être étendue sans nécessité et validation.
+
+## Accès à la base
+
+- Évite les accès inutiles : pas de requêtes redondantes, pense pagination et index quand c'est pertinent.
+- Gère les erreurs sans exposer de détails techniques à l'utilisateur.

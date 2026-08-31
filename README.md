@@ -1,5 +1,11 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Documentation
+
+- [Supabase](docs/supabase.md) — fondation Supabase (auth, sessions, RLS, migrations)
+- [MCP](docs/mcp.md) — servers MCP recommandés pour Cursor
+- [Déploiement Vercel](docs/vercel.md) — variables d'environnement et connexion
+
 ## Getting Started
 
 First, run the development server:

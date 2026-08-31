@@ -1,0 +1,47 @@
+---
+description: Conventions de test : Vitest pour les unités, tests pertinents, ne pas masquer un échec.
+alwaysApply: false
+globs: ["**/*.test.ts", "**/*.test.tsx", "vitest.config.ts"]
+---
+
+# Testing
+
+## Cadre
+
+- **Vitest** pour les tests unitaires (déjà installé, `pnpm test`).
+- La suite tourne via `vitest.config.ts` (alias `@` → `src`, environnement `node`).
+- Un test doit être **prévisible** et **rapide** : pas d'appels réseau, pas de dépendance à un serveur.
+
+## Quoi tester
+
+Teste la **logique importante** : schémas de validation (Zod), helpers de transformation, parsing, règles métier pures.
+
+Candidats évidents du Starter :
+
+- `src/lib/validation/*` (schémas, `getFirstErrorMessage`) ;
+- `src/lib/auth/schemas.ts` (login, signUp, resetPassword).
+
+Ne teste pas artificiellement :
+
+- le code trivial ou purement déclaratif ;
+- les composants UI sans logique ;
+- ce qui est déjà couvert par le typecheck.
+
+## Comment écrire
+
+- Un fichier `foo.test.ts` à côté de `foo.ts`.
+- Nommage : `describe("nomDuModule", ...)`, `it("accepte/rejette ...", ...)`.
+- Vérifie l'existant avant d'écrire : ne duplique pas un test déjà présent.
+
+## Règles strictes
+
+- **Ne supprime jamais un test pour faire passer la CI.**
+- Ne désactive jamais une assertion (`it.skip`, `it.only` laissé, `expect(...).anything()`).
+- Si un test échoue, **corrige le code ou le test**, ne le masque pas.
+- N'introduis aucun secret ni valeur réelle dans les tests.
+
+## Vérifications associées
+
+- `pnpm test` (unités)
+- `pnpm typecheck`
+- `pnpm lint`
