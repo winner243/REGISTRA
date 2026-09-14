@@ -12,7 +12,7 @@ export type Stat = {
 export const stats: Stat[] = [
   {
     id: "revenue",
-    label: "Revenue",
+    label: "Revenus",
     value: "$12,450",
     icon: DollarSign,
     trend: "+12.5%",
@@ -20,7 +20,7 @@ export const stats: Stat[] = [
   },
   {
     id: "users",
-    label: "Users",
+    label: "Utilisateurs",
     value: "1,284",
     icon: Users,
     trend: "+8.2%",
@@ -28,7 +28,7 @@ export const stats: Stat[] = [
   },
   {
     id: "projects",
-    label: "Projects",
+    label: "Projets",
     value: "342",
     icon: FolderKanban,
     trend: "+4.1%",
@@ -44,7 +44,7 @@ export type ActivityItem = {
 }
 
 export const recentActivity: ActivityItem[] = [
-  { id: "1", action: "Created project", user: "John Doe", date: "Today" },
-  { id: "2", action: "Updated profile", user: "Jane Doe", date: "Yesterday" },
-  { id: "3", action: "Added customer", user: "Alex Martin", date: "2 days ago" },
+  { id: "1", action: "Projet créé", user: "John Doe", date: "Aujourd'hui" },
+  { id: "2", action: "Profil mis à jour", user: "Jane Doe", date: "Hier" },
+  { id: "3", action: "Client ajouté", user: "Alex Martin", date: "Il y a 2 jours" },
 ]

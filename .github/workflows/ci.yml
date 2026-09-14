@@ -40,3 +40,78 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+  db-migrations:
+    name: Validate migrations on a fresh database
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: saas_starter_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d saas_starter_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install postgresql-client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Apply Supabase auth stubs
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f tests/db/supabase-auth-stubs.sql
+          echo "::notice::Auth stubs applied"
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/saas_starter_test
+
+      - name: Apply migrations in order
+        run: |
+          for f in supabase/migrations/*.sql; do
+            echo "Applying $f"
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
+          done
+          echo "::notice::Migrations applied successfully"
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/saas_starter_test
+
+      - name: Run multi-tenant RLS isolation tests
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f tests/db/isolation-tests.sql
+          echo "::notice::Multi-tenancy RLS isolation tests passed (A→A/A→B/B→B/B→A + invitations)"
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/saas_starter_test
+
+      - name: Run billing engine tests (plans, entitlements, limits, usage, security)
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f tests/db/billing-tests.sql
+          echo "::notice::Billing engine tests passed (entitlements, limits, usage, RLS, security)"
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/saas_starter_test
+
+      - name: Verify schema objects
+        run: |
+          echo "Tables in public schema:"
+          psql "$DATABASE_URL" -At -c \
+            "SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename;"
+          echo "RLS policies per table:"
+          psql "$DATABASE_URL" -At -c \
+            "SELECT tablename, count(*) FROM pg_policies WHERE schemaname = 'public' GROUP BY tablename ORDER BY tablename;"
+          echo "RLS enabled on foundations tables:"
+          psql "$DATABASE_URL" -At -c \
+            "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename IN ('profiles','organizations','memberships','roles','permissions','role_permissions','invitations') ORDER BY tablename;"
+          echo "RLS enabled on billing tables:"
+          psql "$DATABASE_URL" -At -c \
+            "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename IN ('plans','features','plan_features','plan_limits','subscriptions','usage','usage_events') ORDER BY tablename;"
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/saas_starter_test

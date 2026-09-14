@@ -1,0 +1,32 @@
+meta {
+  name: Server Action — login (empty email)
+  type: http
+  seq: 52
+  doc: |
+    Teste la validation Zod côté serveur avec un email vide.
+    Devrait retourner une erreur de validation.
+}
+
+vars {
+  base_url: http://localhost:3000
+  action_id_login: 60a204282119020ccbb93dd1c64c000af939475040
+  test_password: TestPassword123!
+}
+
+post {
+  url: "{{base_url}}/login"
+  headers: {
+    Next-Action: "{{action_id_login}}"
+    Accept: text/x-component
+  }
+  body: multipart/form-data {
+    key: "0"
+    value: "{{\"root\":\"$@1\",\"1\":\"{\\\"email\\\":\\\"\\\",\\\"password\\\":\\\"{{test_password}}\\\"}\"}"
+    type: text/plain
+  }
+}
+
+tests {
+  assert(res.status, "Status should be 200", res.status === 200)
+  assert("Should NOT redirect (validation error)", !res.headers.hasOwnProperty("x-action-redirect"))
+}

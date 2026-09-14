@@ -1,0 +1,32 @@
+meta {
+  name: Server Action — login (invalid action ID)
+  type: http
+  seq: 53
+  doc: |
+    Teste l'appel avec un action ID invalide.
+    Devrait retourner 404.
+}
+
+vars {
+  base_url: http://localhost:3000
+  test_email: {{your_test_email}}
+  test_password: {{your_test_password}}
+}
+
+post {
+  url: "{{base_url}}/login"
+  headers: {
+    Next-Action: "000000000000000000000000000000000000000000"
+    Accept: text/x-component
+  }
+  body: multipart/form-data {
+    key: "0"
+    value: "{{\"root\":\"$@1\",\"1\":\"{\\\"email\\\":\\\"{{test_email}}\\\",\\\"password\\\":\\\"{{test_password}}\\\"}\"}"
+    type: text/plain
+  }
+}
+
+tests {
+  assert(res.status, "Status should be 404 for invalid action ID", res.status === 404)
+  assert("Should have x-nextjs-action-not-found header", res.headers["x-nextjs-action-not-found"] === "1")
+}

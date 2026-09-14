@@ -1,0 +1,23 @@
+meta {
+  name: Auth Callback — No code parameter
+  type: http
+  seq: 42
+}
+
+vars {
+  base_url: http://localhost:3000
+}
+
+get {
+  url: "{{base_url}}/auth/callback"
+  body: none
+}
+
+tests {
+  assert(res.status, "Status should be 302 (redirect to error)", res.status === 302)
+  assert("Should redirect to /login with error", res.headers.hasOwnProperty("location"))
+
+  if (res.headers.location) {
+    assert("Location should contain 'error'", res.headers.location.includes("error"))
+  }
+}

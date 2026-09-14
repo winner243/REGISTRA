@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "SaaS Starter V2",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

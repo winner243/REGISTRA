@@ -21,7 +21,14 @@ export function MarketingNav() {
       <Navbar
         links={mainNav}
         onMenuClick={() => setOpen(true)}
-        rightSlot={<Button className="hidden md:inline-flex">Se connecter</Button>}
+        rightSlot={
+          <Button
+            className="hidden md:inline-flex"
+            render={<Link href="/login" />}
+          >
+            Se connecter
+          </Button>
+        }
       />
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="right" className="flex h-full flex-col gap-6 p-4">
@@ -55,7 +62,9 @@ export function MarketingNav() {
             })}
           </nav>
           <div className="mt-auto">
-            <Button className="w-full">Se connecter</Button>
+            <Button className="w-full" render={<Link href="/login" />}>
+              Se connecter
+            </Button>
           </div>
         </SheetContent>
       </Sheet>

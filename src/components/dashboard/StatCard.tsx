@@ -50,7 +50,7 @@ export function StatCard({
               )}
             />
             <span className="font-medium text-foreground">{trend}</span>
-            <span>vs last month</span>
+            <span>vs mois dernier</span>
           </p>
         )}
       </CardContent>

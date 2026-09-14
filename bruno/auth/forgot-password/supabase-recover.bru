@@ -1,0 +1,29 @@
+meta {
+  name: Supabase Direct — Forgot Password
+  type: http
+  seq: 30
+}
+
+vars {
+  supabase_url: http://localhost:54321
+  supabase_anon_key: {{paste_your_anon_key_here}}
+  test_email: {{your_test_email}}
+}
+
+post {
+  url: "{{supabase_url}}/auth/v1/recover"
+  headers: {
+    Content-Type: application/json
+    apikey: "{{supabase_anon_key}}"
+    Authorization: "Bearer {{supabase_anon_key}}"
+  }
+  body: json {
+    "email": "{{test_email}}",
+    "gotrue_meta_security": {}
+  }
+}
+
+tests {
+  assert(res.status, "Status should be 200", res.status === 200)
+  assert("Should return a message", res.body.hasOwnProperty("msg"))
+}

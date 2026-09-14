@@ -1,0 +1,30 @@
+meta {
+  name: Supabase Direct — Sign Up (invalid email)
+  type: http
+  seq: 13
+}
+
+vars {
+  supabase_url: http://localhost:54321
+  supabase_anon_key: {{paste_your_anon_key_here}}
+  test_email: not-an-email
+  test_password: TestPassword123!
+}
+
+post {
+  url: "{{supabase_url}}/auth/v1/signup"
+  headers: {
+    Content-Type: application/json
+    apikey: "{{supabase_anon_key}}"
+    Authorization: "Bearer {{supabase_anon_key}}"
+  }
+  body: json {
+    "email": "{{test_email}}",
+    "password": "{{test_password}}"
+  }
+}
+
+tests {
+  assert(res.status, "Status should be 400 for invalid email", res.status === 400)
+  assert("Should contain error about invalid email", res.body.hasOwnProperty("msg") || res.body.hasOwnProperty("error_description"))
+}

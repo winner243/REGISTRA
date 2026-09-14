@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import type { ReactNode } from "react"
 import type { User } from "@supabase/supabase-js"
 
@@ -8,6 +8,7 @@ import { Navbar } from "@/components/layout/Navbar"
 import { Sidebar } from "@/components/layout/Sidebar"
 import { MobileNav } from "@/components/layout/MobileNav"
 import { UserMenu } from "@/components/layout/UserMenu"
+import { identify } from "@/lib/analytics"
 
 interface AppShellProps {
   user: User
@@ -16,6 +17,13 @@ interface AppShellProps {
 
 export function AppShell({ user, children }: AppShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
+
+  // Rattache les événements à l'utilisateur authentifié (identifiant
+  // stable non personnel, cf. lib/analytics). Ne dépend pas de PostHog :
+  // identify() est un no-op si aucun fournisseur n'est configuré.
+  useEffect(() => {
+    identify(user.id)
+  }, [user.id])
 
   return (
     <div className="flex min-h-full flex-col">

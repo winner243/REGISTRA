@@ -201,24 +201,31 @@ Chaque futur SaaS devra activer RLS et définir ses policies table par table.
 
 ## Migrations
 
-Stratégie recommandée : migrations **versionnées** au format SQL dans un dossier
-`supabase/migrations/`, appliquées avec la CLI Supabase.
+La base est **générique** : seules les extensions, les helpers et la table de
+fondation `profiles` existent. Chaque futur SaaS apportera son propre modèle et ses
+propres migrations.
+
+Structure : `supabase/config.toml` (dev local) + `supabase/migrations/` (fichiers
+SQL **versionnés**, ordonnés par timestamp, idempotents).
 
 ```bash
-pnpm dlx supabase init
-pnpm dlx supabase link --project-ref <ref>
-pnpm dlx supabase db push          # applique les migrations locales
+pnpm dlx supabase start         # démarre la base locale (Docker)
+pnpm dlx supabase db push       # applique les migrations locales
 # ou, en CI / production :
 pnpm dlx supabase db push --remote
 ```
 
-À chaque modification de schéma :
+À chaque modification de schéma — **toujours par migration**, jamais en direct :
 
 1. Crée un fichier `supabase/migrations/<timestamp>_description.sql`.
-2. Teste localement.
+2. Teste (base locale, et job CI `db-migrations` sur base PostgreSQL vierge).
 3. Applique (`db push`) puis commit le fichier de migration.
 
-Ne crée pas ici de base métier arbitraire « pour tester » : le Starter reste générique.
+Règles détaillées (intégrité, indexes, relations, RLS, timestamps, soft delete) :
+[`documentation/database.md`](../documentation/database.md).
+
+Ne crée pas ici de base métier arbitraire « pour tester » : le Starter reste
+générique.
 
 ---
 

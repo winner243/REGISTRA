@@ -1,0 +1,53 @@
+meta {
+  name: Server Action — login (success)
+  type: http
+  seq: 50
+  doc: |
+    Appelle l'action Server "login" via le protocole Next.js 16.
+    
+    PROTOCOLE :
+    - POST vers la page /login
+    - Header "Next-Action: <action-id>"
+    - Body: FormData encodé via React Flight
+    
+    LIMITATIONS :
+    - La réponse est en format Flight (text/x-component), pas JSON
+    - En cas de succès, redirect() est appelé → status 200/203 + header x-action-redirect
+    - Les action IDs changent à chaque rebuild
+    
+    Pour trouver les action IDs :
+    cat .next/server/server-reference-manifest.json
+}
+
+vars {
+  base_url: http://localhost:3000
+  action_id_login: 60a204282119020ccbb93dd1c64c000af939475040
+  test_email: {{your_test_email}}
+  test_password: {{your_test_password}}
+}
+
+post {
+  url: "{{base_url}}/login"
+  headers: {
+    Next-Action: "{{action_id_login}}"
+    Accept: text/x-component
+  }
+  body: multipart/form-data {
+    key: "0"
+    value: "{{\"root\":\"$@1\",\"1\":\"{\\\"email\\\":\\\"{{test_email}}\\\",\\\"password\\\":\\\"{{test_password}}\\\"}\"}"
+    type: text/plain
+  }
+}
+
+tests {
+  assert(res.status, "Status should be 200 or 203", res.status === 200 || res.status === 203)
+
+  if (res.status === 200) {
+    const ct = res.headers["content-type"] || ""
+    assert("Content-Type should be text/x-component", ct.includes("text/x-component"))
+  }
+
+  if (res.status === 203) {
+    assert("Should have x-action-redirect header", res.headers.hasOwnProperty("x-action-redirect"))
+  }
+}

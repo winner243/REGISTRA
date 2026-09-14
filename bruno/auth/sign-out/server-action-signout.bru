@@ -1,0 +1,35 @@
+meta {
+  name: Server Action — signOut
+  type: http
+  seq: 90
+  doc: |
+    Appelle l'action signOut.
+    Redirige vers /login après destruction de la session.
+    
+    Note : cette action fonctionne même sans session active
+    (Supabase ignore silencieusement).
+}
+
+vars {
+  base_url: http://localhost:3000
+  action_id_signout: 00997f94c176f13721f4752b99334b66f8ec23435c
+}
+
+post {
+  url: "{{base_url}}/dashboard"
+  headers: {
+    Next-Action: "{{action_id_signout}}"
+    Accept: text/x-component
+  }
+  body: multipart/form-data {
+    key: "0"
+    value: "[]"
+    type: text/plain
+  }
+}
+
+tests {
+  assert(res.status, "Status should be 200 or 203", res.status === 200 || res.status === 203)
+  const ct = res.headers["content-type"] || ""
+  assert("Content-Type should be text/x-component", ct.includes("text/x-component"))
+}

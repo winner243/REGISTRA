@@ -1,9 +1,11 @@
 "use client"
 
-import { useActionState, useState, type FormEvent } from "react"
+import { useActionState, useEffect, useState, type FormEvent } from "react"
 import Link from "next/link"
 
 import { signUp, type AuthResult } from "@/lib/auth/actions"
+import { track } from "@/lib/analytics"
+import { AnalyticsEvents } from "@/lib/analytics"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -51,6 +53,12 @@ export function RegisterForm() {
 
   const error = state?.error ?? clientError
   const success = state?.success
+
+  useEffect(() => {
+    if (success) {
+      track(AnalyticsEvents.signedUp)
+    }
+  }, [success])
 
   return (
     <AuthCard

@@ -24,13 +24,13 @@ export default async function AccountPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Account"
+        title="Compte"
         description="Gérez votre compte et votre sécurité."
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Account information</CardTitle>
+          <CardTitle>Informations du compte</CardTitle>
           <CardDescription>
             Les informations associées à votre compte.
           </CardDescription>
@@ -53,21 +53,21 @@ export default async function AccountPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Security</CardTitle>
+          <CardTitle>Sécurité</CardTitle>
           <CardDescription>
             Actions liées à la sécurité de votre compte.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Button variant="outline" disabled title="Fonctionnalité à venir">
-            Change password
+            Changer le mot de passe
           </Button>
         </CardContent>
       </Card>
 
       <Card className="border-destructive/40">
         <CardHeader>
-          <CardTitle className="text-destructive">Danger zone</CardTitle>
+          <CardTitle className="text-destructive">Zone de danger</CardTitle>
           <CardDescription>
             Actions irréversibles sur votre compte.
           </CardDescription>
@@ -84,7 +84,7 @@ export default async function AccountPage() {
             disabled
             title="Suppression bientôt disponible"
           >
-            Delete account
+            Supprimer le compte
           </Button>
         </CardFooter>
       </Card>

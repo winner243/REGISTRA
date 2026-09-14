@@ -18,15 +18,15 @@ export function SettingsTabs() {
   return (
     <Tabs defaultValue="general" className="w-full">
       <TabsList>
-        <TabsTrigger value="general">General</TabsTrigger>
+        <TabsTrigger value="general">Général</TabsTrigger>
         <TabsTrigger value="notifications">Notifications</TabsTrigger>
-        <TabsTrigger value="appearance">Appearance</TabsTrigger>
+        <TabsTrigger value="appearance">Apparence</TabsTrigger>
       </TabsList>
 
       <TabsContent value="general">
         <Card>
           <CardHeader>
-            <CardTitle>General</CardTitle>
+            <CardTitle>Général</CardTitle>
             <CardDescription>
               Configurations générales de votre espace.
             </CardDescription>
@@ -97,7 +97,7 @@ export function SettingsTabs() {
       <TabsContent value="appearance">
         <Card>
           <CardHeader>
-            <CardTitle>Appearance</CardTitle>
+            <CardTitle>Apparence</CardTitle>
             <CardDescription>
               Personnalisez l&apos;apparence de votre espace.
             </CardDescription>

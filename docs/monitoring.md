@@ -1,8 +1,8 @@
 # Monitoring — Sentry
 
-Ce document décrit l'intégration de **Sentry** pour la détection d'erreurs
-applicatives. **Sentry n'est pas encore installé** : aucun DSN n'a été fourni, et on ne
-crée pas de configuration fictive.
+Ce document décrit l'intégration de **Sentry** (via `@sentry/nextjs`) pour la
+détection d'erreurs applicatives. Le SDK est **installé** et s'active dès qu'un
+DSN réel est fourni ; sans DSN, rien n'est envoyé.
 
 ---
 
@@ -22,62 +22,72 @@ Erreur
 
 ## Situation actuelle
 
-- **Aucune** trace de Sentry dans `package.json`, `src/` ou la configuration.
-- Aucun DSN n'est présent dans le code ni dans `.env.example`.
-
-Tant qu'un **DSN réel** n'est pas fourni, le projet reste sans Sentry — c'est un choix
-volontaire (pas de valeur factice).
+- Dépendance installée : `@sentry/nextjs`.
+- Intégration Next.js 16 (App Router) via `next.config.ts` (`withSentryConfig`)
+  et les conventions d'instrumentation :
+  - `src/instrumentation.ts` — serveur (runtime `nodejs` **et** `edge`) ;
+  - `src/instrumentation-client.ts` — navigateur.
+- Configuration initialisée par runtime :
+  - `src/sentry.server.config.ts` (Node.js) ;
+  - `src/sentry.edge.config.ts` (Edge / proxy) ;
+  - l'initialisation navigateur est dans `src/instrumentation-client.ts`.
+- Le DSN se lit dans la variable **publique** `NEXT_PUBLIC_SENTRY_DSN`
+  (nécessaire aussi pour capter les erreurs navigateur). Tant qu'elle est vide,
+  le SDK est présent mais inactif (aucun appel réseau).
+- Validation par tests + route de diagnostic.
 
 ---
 
-## Intégration recommandée (à faire manuellement)
+## Variables d'environnement
 
-Dépendances recommandées (à installer quand le DSN sera disponible) :
+| Variable | Usage |
+| --- | --- |
+| `NEXT_PUBLIC_SENTRY_DSN` | DSN du projet Sentry (publique, lisible par le navigateur et le serveur) |
 
-```bash
-pnpm add @sentry/nextjs
-```
-
-Puis configuration via **`sentry.client.config.ts`**, **`sentry.server.config.ts`**
-et **`sentry.edge.config.ts`** (ou l'outil `npx @sentry/wizard -i nextjs`).
-
-Le **DSN** doit être fourni via une variable d'environnement **côté serveur**, par
-exemple :
-
-```
-NEXT_PUBLIC_SENTRY_DSN=
-```
-
-> ⚠️ Si le DSN doit rester côté serveur, ne pas le préfixer par `NEXT_PUBLIC_*`. Le
-> mode exact dépend de la configuration choisie (client vs serveur).
-
-### Étapes manuelles
-
-1. Créer un projet **Sentry** et récupérer le **DSN**.
-2. Installer `@sentry/nextjs` et lancer le wizard.
-3. Configurer le DSN en variable d'environnement.
-4. Initialiser dans `instrumentation.ts` (convention Next.js).
-5. Vérifier dans Sentry que les erreurs remontent réellement.
+La valeur se met dans `.env.local` (dev) et dans les variables Vercel
+(Preview / Production). `.env.example` ne contient que le **nom**.
 
 ---
 
 ## Confidentialité
 
-Ne **jamais** collecter via Sentry (ou tout analytics) :
+Ne **jamais** collecter via Sentry :
 
 - mots de passe ;
 - tokens / clés ;
 - données sensibles ;
 - informations personnelles (PII) non nécessaires à la correction.
 
-Désactiver la capture de données non essentielles (ex. valeurs de formulaires
-sensibles) via les options de rédaction de Sentry (`beforeSend`,
-`beforeSendTransaction`, redaction list).
+La configuration désactive par défaut :
+- `userInfo` (pas d'identité utilisateur automatique) ;
+- `httpBodies` (aucun corps de requête HTTP) ;
+- `stackFrameVariables` (pas de variables de stack).
+
+Compléter avec `beforeSend` / `beforeSendTransaction` si un futur SaaS doit
+rédiger davantage de données.
 
 ---
 
 ## Vérification
 
-La documentation du repo ne doit **jamais** affirmer « Sentry configuré » tant que le
-projet n'est pas réellement connecté. Après configuration, vérifier un événement de
-test dans le tableau de bord Sentry.
+### Test automatisé
+
+`src/lib/monitoring/sentry.test.ts` :
+- vérifie que les hooks serveur (capture) existent ;
+- si un DSN est présent dans `.env.local`, teste une capture de bout en bout ;
+- sans DSN (ex. CI), les tests liés au DSN sont ignorés, la suite reste verte.
+
+### Route de diagnostic
+
+`GET /api/sentry-test` renvoie l'état du client Sentry et capture une erreur de
+test :
+- `GET /api/sentry-test` — capture une exception ;
+- `GET /api/sentry-test?capture=requestError` — capture une erreur de requête.
+
+La collection Bruno `bruno/api/sentry-test/` couvre ces deux cas.
+
+### Vérification manuelle dans Sentry
+
+Après configuration du DSN réel dans les environnements souhaités :
+1. appeler la route de diagnostic ;
+2. vérifier que l'événement de test apparaît dans le tableau de bord Sentry.

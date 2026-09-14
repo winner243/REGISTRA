@@ -1,0 +1,29 @@
+meta {
+  name: Supabase Direct — Forgot Password (nonexistent email)
+  type: http
+  seq: 31
+}
+
+vars {
+  supabase_url: http://localhost:54321
+  supabase_anon_key: {{paste_your_anon_key_here}}
+  test_email: ghost-{{timestamp}}@nowhere.com
+}
+
+post {
+  url: "{{supabase_url}}/auth/v1/recover"
+  headers: {
+    Content-Type: application/json
+    apikey: "{{supabase_anon_key}}"
+    Authorization: "Bearer {{supabase_anon_key}}"
+  }
+  body: json {
+    "email": "{{test_email}}",
+    "gotrue_meta_security": {}
+  }
+}
+
+tests {
+  assert(res.status, "Status should be 200 (prevents user enumeration)", res.status === 200)
+  assert("Should return same message as for existing user", res.body.hasOwnProperty("msg"))
+}

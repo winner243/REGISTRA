@@ -1,6 +1,7 @@
 "use client"
 
 import type { User } from "@supabase/supabase-js"
+import Link from "next/link"
 
 import {
   DropdownMenu,
@@ -14,6 +15,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { LogOut, Settings, User as UserIcon } from "lucide-react"
 import { signOut } from "@/lib/auth/actions"
+import { track, resetAnalytics } from "@/lib/analytics"
+import { AnalyticsEvents } from "@/lib/analytics"
 
 interface UserMenuProps {
   user: User
@@ -45,17 +48,24 @@ export function UserMenu({ user }: UserMenuProps) {
         <DropdownMenuLabel>{name}</DropdownMenuLabel>
         <DropdownMenuLabel>{email}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem disabled>
+        <DropdownMenuItem render={<Link href="/dashboard/profile" />}>
           <UserIcon />
-          Profile
+          Profil
         </DropdownMenuItem>
-        <DropdownMenuItem disabled>
+        <DropdownMenuItem render={<Link href="/dashboard/settings" />}>
           <Settings />
-          Settings
+          Paramètres
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive">
-          <form action={signOut} className="flex w-full items-center gap-1.5">
+          <form
+            action={signOut}
+            onSubmit={() => {
+              track(AnalyticsEvents.loggedOut)
+              resetAnalytics()
+            }}
+            className="flex w-full items-center gap-1.5"
+          >
             <button
               type="submit"
               className="flex flex-1 items-center gap-1.5"

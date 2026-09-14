@@ -1,0 +1,29 @@
+meta {
+  name: Health Check — Sentry Test
+  type: http
+  seq: 1
+}
+
+vars {
+  base_url: http://localhost:3000
+}
+
+get {
+  url: "{{base_url}}/api/sentry-test"
+  body: none
+}
+
+tests {
+  assert(res.status, "Status should be 200 or 500", res.status === 200 || res.status === 500)
+
+  if (res.status === 200) {
+    assert("body.ok should be true", res.body.ok === true)
+    assert("body.dsn should be a string", typeof res.body.dsn === "string")
+    assert("body.capture should be 'exception' by default", res.body.capture === "exception")
+  }
+
+  if (res.status === 500) {
+    assert("body.ok should be false", res.body.ok === false)
+    assert("body.error should indicate Sentry not initialized", res.body.error.includes("Sentry"))
+  }
+}

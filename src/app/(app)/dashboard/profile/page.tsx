@@ -35,7 +35,7 @@ export default async function ProfilePage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Profile"
+        title="Profil"
         description="Vos informations personnelles."
       />
 

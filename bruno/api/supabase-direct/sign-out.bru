@@ -1,0 +1,30 @@
+meta {
+  name: Supabase Direct — Sign Out
+  type: http
+  seq: 102
+  doc: |
+    Invalide le refresh token côté Supabase.
+}
+
+vars {
+  supabase_url: http://localhost:54321
+  supabase_anon_key: {{paste_your_anon_key_here}}
+  access_token: {{paste_access_token_here}}
+  refresh_token: {{paste_refresh_token_here}}
+}
+
+post {
+  url: "{{supabase_url}}/auth/v1/logout"
+  headers: {
+    Content-Type: application/json
+    apikey: "{{supabase_anon_key}}"
+    Authorization: "Bearer {{access_token}}"
+  }
+  body: json {
+    "scope": "global"
+  }
+}
+
+tests {
+  assert(res.status, "Status should be 204", res.status === 204)
+}

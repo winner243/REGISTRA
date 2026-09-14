@@ -53,7 +53,7 @@ export default function PricingPage() {
     <section className="mx-auto w-full max-w-7xl flex-1 px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
       <div className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center">
         <h1 className="text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-          Pricing
+          Tarification
         </h1>
         <p className="text-pretty text-muted-foreground">
           Des plans simples et évolutifs. Les prix affichés sont de
@@ -74,7 +74,7 @@ export default function PricingPage() {
                 <span className="text-3xl font-semibold tracking-tight text-foreground">
                   {plan.price}
                 </span>
-                <span className="text-sm text-muted-foreground">/ month</span>
+                <span className="text-sm text-muted-foreground">/ mois</span>
               </div>
             </CardHeader>
             <CardContent>

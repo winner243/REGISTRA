@@ -203,22 +203,22 @@ La structure des données et les policies sont à définir par chaque futur SaaS
 
 ## Monitoring
 
-Sentry n'est **pas encore installé** (aucun DSN fourni). L'intégration recommandée
-et les étapes manuelles sont documentées dans
-[`documentation/security.md`](documentation/security.md) et
+Sentry est intégré via `@sentry/nextjs` et s'active dès que le **DSN** est
+renseigné dans `NEXT_PUBLIC_SENTRY_DSN` (sans DSN, rien n'est envoyé). Le
+détail (fichiers d'instrumentation, confidentialité, vérification) est dans
 [`docs/monitoring.md`](docs/monitoring.md).
 
 Ne mets jamais de DSN dans le code : il se configure via la variable
-d'environnement **côté serveur**.
+d'environnement (`.env.local` en dev, Vercel en Preview/Production).
 
 ---
 
 ## Analytics
 
-Aucun fournisseur analytics n'est imposé. Une **architecture réutilisable** est
-documentée dans [`documentation/analytics.md`](documentation/analytics.md) : événements
-clairement nommés, fonctions réutilisables, respect de la confidentialité, fournisseur
-remplaçable.
+PostHog est branché derrière une **architecture réutilisable** et
+**désactivable** : sans `NEXT_PUBLIC_POSTHOG_KEY`, la couche est inactive.
+Événements clairement nommés, identité non personnelle, fournisseur
+remplaçable — tout est documenté dans [`docs/analytics.md`](docs/analytics.md).
 
 ---
 

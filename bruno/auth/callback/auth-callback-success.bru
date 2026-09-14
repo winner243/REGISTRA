@@ -1,0 +1,38 @@
+meta {
+  name: Auth Callback — Success (code exchange)
+  type: http
+  seq: 40
+  doc: |
+    Teste le callback Supabase avec un vrai code d'autorisation.
+    
+    IMPORTANT : Ce test nécessite un code d'autorisation valide
+    obtenu lors d'un flow OAuth ou de confirmation email.
+    
+    Pour tester :
+    1. Initiez un login OAuth (Google, GitHub...) depuis le frontend
+    2. Copiez le "code" depuis l'URL de redirect vers /auth/callback
+    3. Collez-le dans la variable "auth_code"
+    
+    En dev sans OAuth configuré, ce test retournera toujours
+    une redirection vers /login?error=...
+}
+
+vars {
+  base_url: http://localhost:3000
+  auth_code: {{replace_with_real_auth_code}}
+}
+
+get {
+  url: "{{base_url}}/auth/callback?code={{auth_code}}"
+  body: none
+}
+
+tests {
+  assert(res.status, "Status should be 302 (redirect)", res.status === 302)
+  assert("Should redirect to Location header", res.headers.hasOwnProperty("location"))
+
+  if (res.status === 302) {
+    const location = res.headers.location
+    assert("Location should be a valid URL", location && location.length > 0)
+  }
+}

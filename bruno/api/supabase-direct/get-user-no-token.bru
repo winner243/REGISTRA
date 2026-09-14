@@ -1,0 +1,23 @@
+meta {
+  name: Supabase Direct — Get User (no token / invalid)
+  type: http
+  seq: 101
+}
+
+vars {
+  supabase_url: http://localhost:54321
+  supabase_anon_key: {{paste_your_anon_key_here}}
+}
+
+get {
+  url: "{{supabase_url}}/auth/v1/user"
+  headers: {
+    apikey: "{{supabase_anon_key}}"
+    Authorization: "Bearer invalid-token-12345"
+  }
+}
+
+tests {
+  assert(res.status, "Status should be 401", res.status === 401)
+  assert("Should contain error", res.body.hasOwnProperty("msg") || res.body.hasOwnProperty("error"))
+}

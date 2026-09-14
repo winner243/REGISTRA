@@ -1,0 +1,28 @@
+meta {
+  name: Supabase Direct — Get User (with valid token)
+  type: http
+  seq: 100
+  doc: |
+    Teste l'endpoint /auth/v1/user avec un token valide.
+    Nécessite un access_token obtenu via /auth/v1/token.
+}
+
+vars {
+  supabase_url: http://localhost:54321
+  supabase_anon_key: {{paste_your_anon_key_here}}
+  access_token: {{paste_access_token_here}}
+}
+
+get {
+  url: "{{supabase_url}}/auth/v1/user"
+  headers: {
+    apikey: "{{supabase_anon_key}}"
+    Authorization: "Bearer {{access_token}}"
+  }
+}
+
+tests {
+  assert(res.status, "Status should be 200", res.status === 200)
+  assert("Should return user object", res.body.hasOwnProperty("id"))
+  assert("Should return email", res.body.hasOwnProperty("email"))
+}

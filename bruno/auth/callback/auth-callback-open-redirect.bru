@@ -1,0 +1,40 @@
+meta {
+  name: Auth Callback — Open redirect prevention
+  type: http
+  seq: 43
+  doc: |
+    Teste la protection contre les redirections ouvertes.
+    Le paramètre "next" doit commencer par "/" et ne pas commencer par "//".
+    Toute tentative de redirect externe est neutralisée vers /dashboard.
+}
+
+vars {
+  base_url: http://localhost:3000
+}
+
+get {
+  url: "{{base_url}}/auth/callback?code=any&next=https://evil.com"
+  body: none
+}
+
+tests {
+  assert(res.status, "Status should be 302 (redirect)", res.status === 302)
+  assert("Should redirect to Location header", res.headers.hasOwnProperty("location"))
+
+  if (res.headers.location) {
+    assert("Should NOT redirect to external domain", !res.headers.location.includes("evil.com"))
+  }
+}
+
+get {
+  url: "{{base_url}}/auth/callback?code=any&next=//evil.com"
+  body: none
+}
+
+tests {
+  assert(res.status, "Status should be 302", res.status === 302)
+
+  if (res.headers.location) {
+    assert("Should NOT redirect to double-slash path", !res.headers.location.includes("//evil.com"))
+  }
+}

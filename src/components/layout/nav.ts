@@ -21,18 +21,18 @@ export type NavItem = {
 }
 
 export const mainNav: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard" },
-  { label: "Pricing", href: "/pricing" },
+  { label: "Tableau de bord", href: "/dashboard" },
+  { label: "Tarifs", href: "/pricing" },
   { label: "Documentation" },
 ]
 
 export const sidebarNav: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, exact: true },
-  { label: "Projects", icon: Folder },
-  { label: "Customers", icon: Users },
-  { label: "Analytics", icon: BarChart3 },
-  { label: "Settings", href: "/dashboard/settings", icon: Settings },
-  { label: "Billing", href: "/dashboard/billing", icon: CreditCard },
-  { label: "Account", href: "/dashboard/account", icon: CircleUser },
-  { label: "Profile", href: "/dashboard/profile", icon: IdCard },
+  { label: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard, exact: true },
+  { label: "Projets", icon: Folder },
+  { label: "Clients", icon: Users },
+  { label: "Statistiques", icon: BarChart3 },
+  { label: "Paramètres", href: "/dashboard/settings", icon: Settings },
+  { label: "Facturation", href: "/dashboard/billing", icon: CreditCard },
+  { label: "Compte", href: "/dashboard/account", icon: CircleUser },
+  { label: "Profil", href: "/dashboard/profile", icon: IdCard },
 ]

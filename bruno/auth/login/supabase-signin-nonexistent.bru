@@ -1,0 +1,30 @@
+meta {
+  name: Supabase Direct — Sign In (nonexistent user)
+  type: http
+  seq: 22
+}
+
+vars {
+  supabase_url: http://localhost:54321
+  supabase_anon_key: {{paste_your_anon_key_here}}
+  test_email: nonexistent-{{timestamp}}@example.com
+  test_password: AnyPassword123!
+}
+
+post {
+  url: "{{supabase_url}}/auth/v1/token?grant_type=password"
+  headers: {
+    Content-Type: application/json
+    apikey: "{{supabase_anon_key}}"
+    Authorization: "Bearer {{supabase_anon_key}}"
+  }
+  body: json {
+    "email": "{{test_email}}",
+    "password": "{{test_password}}"
+  }
+}
+
+tests {
+  assert(res.status, "Status should be 401", res.status === 401)
+  assert("Should contain error", res.body.hasOwnProperty("error_description") || res.body.hasOwnProperty("msg"))
+}

@@ -1,0 +1,33 @@
+meta {
+  name: Server Action — signUp (duplicate email)
+  type: http
+  seq: 62
+  doc: |
+    Teste l'inscription avec un email déjà utilisé.
+    Le serveur retourne "Un compte existe déjà avec cette adresse email."
+}
+
+vars {
+  base_url: http://localhost:3000
+  action_id_signup: 60b7a2108a9717b9fd0aca8dba5744c9c802797d08
+  test_email: {{your_existing_email}}
+  test_password: TestPassword123!
+}
+
+post {
+  url: "{{base_url}}/register"
+  headers: {
+    Next-Action: "{{action_id_signup}}"
+    Accept: text/x-component
+  }
+  body: multipart/form-data {
+    key: "0"
+    value: "{{\"root\":\"$@1\",\"1\":\"{\\\"email\\\":\\\"{{test_email}}\\\",\\\"password\\\":\\\"{{test_password}}\\\",\\\"confirmPassword\\\":\\\"{{test_password}}\\\"}\"}"
+    type: text/plain
+  }
+}
+
+tests {
+  assert(res.status, "Status should be 200", res.status === 200)
+  assert("Should NOT redirect (user already exists)", !res.headers.hasOwnProperty("x-action-redirect"))
+}

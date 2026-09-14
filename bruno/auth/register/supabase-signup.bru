@@ -1,0 +1,35 @@
+meta {
+  name: Supabase Direct — Sign Up
+  type: http
+  seq: 10
+}
+
+vars {
+  supabase_url: http://localhost:54321
+  supabase_anon_key: {{paste_your_anon_key_here}}
+  test_email: test-{{timestamp}}@example.com
+  test_password: TestPassword123!
+}
+
+post {
+  url: "{{supabase_url}}/auth/v1/signup"
+  headers: {
+    Content-Type: application/json
+    apikey: "{{supabase_anon_key}}"
+    Authorization: "Bearer {{supabase_anon_key}}"
+  }
+  body: json {
+    "email": "{{test_email}}",
+    "password": "{{test_password}}"
+  }
+}
+
+tests {
+  assert(res.status, "Status should be 200", res.status === 200)
+  assert("Should return user object", res.body.hasOwnProperty("user"))
+  assert("Should return access_token", res.body.hasOwnProperty("access_token") || res.body.hasOwnProperty("session"))
+
+  if (res.body.user) {
+    assert("User email should match", res.body.user.email === "{{test_email}}")
+  }
+}

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import { brand } from "@/config/brand";
+import { AnalyticsProvider, PostHogPageview } from "@/components/providers/PostHogProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,7 +47,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <style dangerouslySetInnerHTML={{ __html: brandStyles }} />
-        {children}
+        <AnalyticsProvider>
+          <PostHogPageview />
+          {children}
+        </AnalyticsProvider>
       </body>
     </html>
   );

@@ -29,7 +29,7 @@ export function RecentActivity({ items }: RecentActivityProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Recent activity</CardTitle>
+        <CardTitle>Activité récente</CardTitle>
         <CardDescription>
           Dernières actions fictives sur votre espace.
         </CardDescription>
@@ -39,7 +39,7 @@ export function RecentActivity({ items }: RecentActivityProps) {
           <TableHeader>
             <TableRow>
               <TableHead>Action</TableHead>
-              <TableHead>User</TableHead>
+              <TableHead>Utilisateur</TableHead>
               <TableHead className="text-right">Date</TableHead>
             </TableRow>
           </TableHeader>
