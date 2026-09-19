@@ -17,6 +17,11 @@ begin
   if not exists (select 1 from pg_roles where rolname = 'authenticated') then
     create role authenticated nologin;
   end if;
+  -- `service_role` : rôle privilégié de la plateforme (contourne RLS).
+  -- Utilisé par l'outbox email, les notifications et le storage (côté serveur).
+  if not exists (select 1 from pg_roles where rolname = 'service_role') then
+    create role service_role nologin;
+  end if;
 end
 $$;
 
@@ -48,6 +53,12 @@ create table if not exists auth.users (
 --    circuitées par un simple manque de privilège).
 grant usage on schema public, auth, extensions to anon, authenticated;
 
+--    `service_role` contourne les policies (privilège administrateur) : il
+--    reçoit ici l'usage des schémas + tous les droits sur les futures tables.
+grant usage on schema public, auth, extensions to service_role;
+alter default privileges for role postgres in schema public
+  grant select, insert, update, delete on tables to service_role;
+
 grant execute on function auth.uid() to anon, authenticated;
 
 --    Sur Supabase, toute table créée par une migration est automatiquement
@@ -56,3 +67,27 @@ grant execute on function auth.uid() to anon, authenticated;
 --    PAR LA SUITE (après application de ce fichier).
 alter default privileges for role postgres in schema public
   grant select, insert, update, delete on tables to anon, authenticated;
+
+-- 5. Schéma `storage` — strict minimum utilisé par les migrations de
+--    stockage de fichiers (création de buckets, verrouillage RLS des objets).
+--    Ne reproduit pas la totalité de l'API Storage : juste les objets que
+--    les migrations touchent. ⚠️ Test uniquement, jamais en production.
+create schema if not exists storage;
+
+create table if not exists storage.buckets (
+  id     text primary key,
+  name   text not null,
+  public boolean not null default false
+);
+
+create table if not exists storage.objects (
+  id               uuid primary key,
+  bucket_id        text not null,
+  name             text not null,
+  owner            uuid,
+  metadata         jsonb not null default '{}'::jsonb,
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now(),
+  last_accessed_at timestamptz not null default now(),
+  unique (bucket_id, name)
+);

@@ -14,7 +14,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const initialState: AuthResult = {}
 
-export function LoginForm() {
+export function LoginForm({ next }: { next?: string }) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [clientError, setClientError] = useState<string | null>(null)
@@ -37,6 +37,9 @@ export function LoginForm() {
     const formData = new FormData()
     formData.set("email", email)
     formData.set("password", password)
+    if (next) {
+      formData.set("next", next)
+    }
     formAction(formData)
   }
 

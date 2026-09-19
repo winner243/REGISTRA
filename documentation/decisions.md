@@ -367,3 +367,108 @@ le coder métier interroge `can_use_feature`/`consume_usage` (jamais le plan en 
 le cycle de vie des abonnements reste piloté par écritures backend jusqu'au
 branchement webhook ; la page `/dashboard/billing` affiche le plan effectif de
 l'organisation (lecture seule) et un état clair quand aucun plan n'est configuré.
+
+---
+
+# Décision : Audit de sécurité V3 — corrections E1-E4, M1-M11, F5-F9
+
+**Date :** phase security hardening (V3)
+**Statut :** Acceptée
+
+**Contexte :** un audit de sécurité complet a identifié 24 issues (0 critique,
+4 élevées, 11 moyennes, 9 faibles) nécessitant des corrections avant gel V3.
+
+**Décision :**
+- **E1** — Open redirect : `getBaseUrlFromHeaders` priorise `NEXT_PUBLIC_APP_URL`
+  ; `safeNextPath` rejette null bytes, `\r\n`, backslashes, URLs absolues,
+  protocoles-relatifs ;
+- **E2** — OAuth callback : utilise `NEXT_PUBLIC_APP_URL` au lieu de `origin`,
+  messages génériques, early return sur code manquant ;
+- **E3** — Énumération de comptes : `getSignUpErrorMessage` retourne toujours le
+  même message quel que soit l'erreur Supabase ;
+- **M1** — Timing-safe comparison : `timingSafeEqual` pour le Bearer token cron ;
+- **M2** — Security headers : X-Frame-Options DENY, HSTS, COOP, CORP,
+  Permissions-Policy, X-XSS-Protection, X-Content-Type-Options, Referrer-Policy ;
+- **M4** — CRLF injection : `stripCrlf` sur tous les sujets email ;
+- **M5** — Cookie security : `httpOnly`, `secure` (prod), `sameSite: lax` ;
+- **M6** — `plan_limits_status()` : vérifie `billing.read` au lieu de `is_member` ;
+- **M7** — Worker cron restreint aux queues autorisées (`emails`) ;
+- **M9** — Messages d'erreur génériques (OAuth, cron) ;
+- **M10** — CRON_SECRET requis en production (503 sinon) ;
+- **F5** — `cron_tasks` : RLS restreint à `authenticated` + ACL révoqué pour
+  `anon` ;
+- **F6** — CI : `permissions: contents: read` ;
+- **F7** — CI : `pnpm audit` ajouté ;
+- **F8** — Logs : suppression des données sensibles dans les handlers jobs ;
+- **F9** — Storage env : supporte `STORAGE_MAX_UPLOAD_SIZE` et legacy
+  `STORAGE_MAX_UPLOAD_BYTES`.
+
+**Alternatives :** ne pas auditer ; reporter les corrections.
+
+**Raison :** un SaaS manipule des données multi-tenant et des secrets ;
+chaque issue potentielle doit être traitée avant toute mise en production.
+
+**Conséquences :** la V3 est une baseline sécurisée vérifiée ; les futurs
+changements doivent maintenir ce niveau.
+
+---
+
+# Décision : CSP Report-Only progressif
+
+**Date :** phase security hardening (V3)
+**Statut :** Acceptée
+
+**Contexte :** les security headers étaient en place mais sans Content Security
+Policy. Un CSP restrictif immédiat risquait de casser PostHog, Sentry, les
+polices Google ou les styles inline.
+
+**Décision :** ajouter `Content-Security-Policy-Report-Only` (pas `Content-Security-Policy`)
+dans `next.config.ts` avec une policy permissive qui ne bloque rien mais identifie
+les sources nécessaires.
+
+Policy initiale :
+- `default-src 'self'`
+- `script-src 'self' 'unsafe-inline' 'unsafe-eval'`
+- `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`
+- `img-src 'self' data: https://*.supabase.co blob:`
+- `font-src 'self' https://fonts.gstatic.com`
+- `connect-src 'self' https://*.supabase.co https://*.sentry.io https://*.posthog.com wss://*.supabase.co`
+- `frame-src 'none'`
+- `object-src 'none'`
+- `base-uri 'self'`
+- `form-action 'self'`
+
+**Alternatives :** CSP restrictif immédiat ; pas de CSP.
+
+**Raison :** un CSP Report-Only ne casse rien, collecte les violations réelles
+et permet de durcir progressivement sans surprise.
+
+**Conséquences :** les rapports de violations seront analysés pour construire
+une CSP restrictive en phase suivante ; `'unsafe-inline'` sera remplacé par
+des nonces quand le layout le supportera.
+
+---
+
+# Décision : Rate limiting distribué reporté
+
+**Date :** phase security hardening (V3)
+**Statut :** Acceptée (reporté)
+
+**Contexte :** le rate limiting en mémoire (`MemoryRateLimitStore`) est
+adapté au développement et aux instances unibles, mais non partagé en
+serverless multi-instances.
+
+**Décision :** ne pas ajouter Redis, Upstash ou infrastructure supplémentaire.
+Conserver le système actuel avec documentation explicite de la limitation
+serverless et de la voie d'évolution (interface `RateLimitStore` déjà
+abstraite, swappable sans changer les appelants).
+
+**Alternatives :** ajouter Redis/Upstash maintenant ; utiliser une table
+Supabase comme store distribué.
+
+**Raison :** le coût et la complexité d'un store distribué ne sont pas
+justifiés tant que le déploiement serverless n'est pas réel. L'abstraction
+permettra une migration sans refactor.
+
+**Conséquences :** en serverless multi-instances, le quota est par instance ;
+documenté dans `docs/rate-limiting.md`.

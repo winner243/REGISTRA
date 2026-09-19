@@ -70,6 +70,37 @@ Trois distinctions essentielles :
 - Un DSN est un secret **côté serveur** : il se configure via variable
   d'environnement et ne doit pas apparaître dans le code, Git, `.env.example`,
   les règles ou `ci.yml`.
+- Pour les source maps Sentry en CI, ajouter `SENTRY_ORG`, `SENTRY_PROJECT`
+  et `SENTRY_AUTH_TOKEN` (jamais exposé côté client).
 
-> Détails opérationnels : [`docs/supabase.md`](../docs/supabase.md) et
-> [`docs/backups.md`](../docs/backups.md).
+## Headers de sécurité
+
+Tous les headers sont configurés dans `next.config.ts` :
+
+- `X-Frame-Options: DENY` — anti-clickjacking
+- `X-Content-Type-Options: nosniff` — anti-MIME-sniffing
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()`
+- `X-XSS-Protection: 1; mode=block`
+- `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`
+- `Cross-Origin-Opener-Policy: same-origin`
+- `Cross-Origin-Resource-Policy: same-origin`
+- `Content-Security-Policy-Report-Only` — policy permissive progressive (pas
+  de blocage, collecte des violations pour durcissement ultérieur)
+
+## Content Security Policy (CSP)
+
+Le CSP est en mode **Report-Only** : il ne bloque rien mais identifie les
+sources nécessaires. Après analyse des rapports de violations, une CSP
+restrictive sera mise en place avec des nonces pour les scripts/styles inline.
+
+## Rate limiting
+
+Le rate limiting utilise un store en mémoire (`MemoryRateLimitStore`),
+adapté au développement et aux instances uniques. En serverless
+multi-instances (Vercel), le quota est par instance. Un store distribué
+(Redis/Upstash/table Supabase) pourra être ajouté via l'interface
+`RateLimitStore` sans changer les appelants — voir `docs/rate-limiting.md`.
+
+> Détails opérationnels : [`docs/supabase.md`](../docs/supabase.md),
+> [`docs/backups.md`](../docs/backups.md), [`docs/rate-limiting.md`](../docs/rate-limiting.md).

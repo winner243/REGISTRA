@@ -3,35 +3,13 @@ import { describe, expect, it } from "vitest"
 import { getSignUpErrorMessage } from "./messages"
 
 describe("getSignUpErrorMessage", () => {
-  it("traduit 'User already registered' (message brut Supabase)", () => {
-    const message = getSignUpErrorMessage({
-      message: "User already registered",
-    })
-    expect(message).toBe("Un compte existe déjà avec cette adresse email.")
-  })
+  it("retourne toujours le même message pour éviter l'énumération de comptes", () => {
+    const expected = "Si un compte existe déjà avec cette adresse, un email de confirmation a été envoyé."
 
-  it("traduit le code 'email_exists' sans dépendre du texte", () => {
-    expect(
-      getSignUpErrorMessage({ code: "email_exists", message: "duplicate email" }),
-    ).toBe("Un compte existe déjà avec cette adresse email.")
-    expect(
-      getSignUpErrorMessage({ code: "user_already_exists", message: "duplicate" }),
-    ).toBe("Un compte existe déjà avec cette adresse email.")
-  })
-
-  it("ne reflète jamais le message brut anglais vers l'utilisateur", () => {
-    const message = getSignUpErrorMessage({
-      message: "provider: internal error 503 (raw technical detail)",
-      code: "unknown_code",
-    })
-    expect(message).toBe(
-      "Une erreur est survenue lors de l'inscription. Réessaie.",
-    )
-  })
-
-  it("retombe sur un message générique sans aucune information", () => {
-    expect(getSignUpErrorMessage({})).toBe(
-      "Une erreur est survenue lors de l'inscription. Réessaie.",
-    )
+    expect(getSignUpErrorMessage({ message: "User already registered" })).toBe(expected)
+    expect(getSignUpErrorMessage({ code: "email_exists", message: "duplicate email" })).toBe(expected)
+    expect(getSignUpErrorMessage({ code: "user_already_exists", message: "duplicate" })).toBe(expected)
+    expect(getSignUpErrorMessage({ message: "provider: internal error 503", code: "unknown_code" })).toBe(expected)
+    expect(getSignUpErrorMessage({})).toBe(expected)
   })
 })

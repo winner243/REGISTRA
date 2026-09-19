@@ -151,7 +151,7 @@ describe("login", () => {
 })
 
 describe("signUp", () => {
-  it("traduit 'User already registered' en un message français", async () => {
+  it("retourne un message générique sur erreur Supabase (anti-énumération)", async () => {
     mocks.createSupabaseServerClient.mockImplementation(async () =>
       makeSupabaseClient({
         signUp: async () => ({
@@ -162,10 +162,10 @@ describe("signUp", () => {
     )
 
     const result = await signUp(null, formData(SIGNUP_DATA))
-    expect(result.error).toBe("Un compte existe déjà avec cette adresse email.")
+    expect(result.error).toBe("Impossible de créer le compte. Vérifie tes informations.")
   })
 
-  it("ne fuit pas un message d'erreur inconnu en anglais", async () => {
+  it("retourne le même message générique pour toute erreur inconnue", async () => {
     mocks.createSupabaseServerClient.mockImplementation(async () =>
       makeSupabaseClient({
         signUp: async () => ({
@@ -176,9 +176,7 @@ describe("signUp", () => {
     )
 
     const result = await signUp(null, formData(SIGNUP_DATA))
-    expect(result.error).toBe(
-      "Une erreur est survenue lors de l'inscription. Réessaie.",
-    )
+    expect(result.error).toBe("Impossible de créer le compte. Vérifie tes informations.")
   })
 
   it("renvoie le message de confirmation quand l'email est requis", async () => {

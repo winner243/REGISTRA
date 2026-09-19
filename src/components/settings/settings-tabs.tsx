@@ -6,13 +6,18 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 
+import { NotificationPreferences } from "@/components/settings/notification-preferences"
+
 const appearanceOptions = ["Clair", "Sombre", "Système"]
 
-export function SettingsTabs() {
+export function SettingsTabs({
+  notificationPreferences = [],
+}: {
+  notificationPreferences: { channel: string; enabled: boolean }[]
+}) {
   const [theme, setTheme] = useState("Système")
 
   return (
@@ -64,32 +69,13 @@ export function SettingsTabs() {
           <CardHeader>
             <CardTitle>Notifications</CardTitle>
             <CardDescription>
-              Gérez les notifications envoyées à votre adresse email.
+              Gérez les canaux de notification de votre espace.
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-sm font-medium text-foreground">
-                  Emails transactionnels
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  Confirmations et mises à jour de compte.
-                </span>
-              </div>
-              <Switch defaultChecked />
-            </div>
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-sm font-medium text-foreground">
-                  Emails marketing
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  Nouvelles fonctionnalités et actualités.
-                </span>
-              </div>
-              <Switch />
-            </div>
+          <CardContent>
+            <NotificationPreferences
+              initialPreferences={notificationPreferences}
+            />
           </CardContent>
         </Card>
       </TabsContent>
@@ -99,7 +85,7 @@ export function SettingsTabs() {
           <CardHeader>
             <CardTitle>Apparence</CardTitle>
             <CardDescription>
-              Personnalisez l&apos;apparence de votre espace.
+              Personalisez l&apos;apparence de votre espace.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">

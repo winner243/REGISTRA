@@ -1,5 +1,5 @@
 /** En-têtes supportés : `Headers`, `ReadonlyHeaders` (next/headers), etc. */
-type HeadersLike = {
+export type HeadersLike = {
   get(name: string): string | null | undefined
 }
 

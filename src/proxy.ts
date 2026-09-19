@@ -3,6 +3,8 @@ import { NextResponse, type NextRequest } from "next/server"
 
 import { getSupabaseEnv, isSupabaseConfigured } from "@/lib/supabase/env"
 
+const isProduction = process.env.NODE_ENV === "production"
+
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
@@ -23,7 +25,13 @@ export async function proxy(request: NextRequest) {
         supabaseResponse = NextResponse.next({ request })
 
         cookiesToSet.forEach(({ name, value, options }) =>
-          supabaseResponse.cookies.set(name, value, options)
+          supabaseResponse.cookies.set(name, value, {
+            ...options,
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: "lax",
+            path: "/",
+          })
         )
       },
     },

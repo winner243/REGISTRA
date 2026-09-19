@@ -7,11 +7,17 @@ export const metadata: Metadata = {
   title: "Connexion",
 }
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string; error?: string }>
+}) {
+  const { next } = await searchParams
+
   return (
     <div className="flex flex-col gap-6">
       <SupabaseNotConfiguredNotice />
-      <LoginForm />
+      <LoginForm next={next} />
     </div>
   )
 }

@@ -3,11 +3,13 @@ import {
   LayoutDashboard,
   Folder,
   Users,
+  UsersRound,
   BarChart3,
   Settings,
   CreditCard,
   CircleUser,
   IdCard,
+  Bell,
 } from "lucide-react"
 
 export type NavItem = {
@@ -30,6 +32,8 @@ export const sidebarNav: NavItem[] = [
   { label: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard, exact: true },
   { label: "Projets", icon: Folder },
   { label: "Clients", icon: Users },
+  { label: "Équipe", href: "/dashboard/team", icon: UsersRound },
+  { label: "Notifications", href: "/dashboard/notifications", icon: Bell },
   { label: "Statistiques", icon: BarChart3 },
   { label: "Paramètres", href: "/dashboard/settings", icon: Settings },
   { label: "Facturation", href: "/dashboard/billing", icon: CreditCard },

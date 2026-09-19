@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server"
 
 import { createSupabaseServerClient } from "@/lib/supabase/server"
+import { safeNextPath } from "@/lib/url"
 
 /**
  * Route de callback d'authentification Supabase.
@@ -14,26 +15,32 @@ import { createSupabaseServerClient } from "@/lib/supabase/server"
  * de bord. La session est ensuite disponible côté client comme côté serveur.
  */
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = request.nextUrl
+  const { searchParams } = request.nextUrl
   const code = searchParams.get("code")
   const next = searchParams.get("next") ?? "/dashboard"
 
-  const supabase = await createSupabaseServerClient()
-  if (!supabase) {
-    // Supabase non configuré : impossible d'échanger un code d'autorisation.
-    return NextResponse.redirect(`${origin}/login?error=supabase_not_configured`)
+  // Utilise NEXT_PUBLIC_APP_URL pour éviter les open redirects.
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? request.nextUrl.origin
+
+  // Absence de code : erreur générique sans disclosure technique.
+  if (!code) {
+    return NextResponse.redirect(`${appUrl}/login?error=auth_callback_missing_code`)
   }
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code ?? "")
+  const supabase = await createSupabaseServerClient()
+  if (!supabase) {
+    return NextResponse.redirect(`${appUrl}/login?error=service_unavailable`)
+  }
+
+  const { error } = await supabase.auth.exchangeCodeForSession(code)
 
   if (error) {
-    return NextResponse.redirect(
-      `${origin}/login?error=${encodeURIComponent(error.message)}`
-    )
+    // Message générique — ne jamais exposer le message brut Supabase.
+    return NextResponse.redirect(`${appUrl}/login?error=auth_callback_failed`)
   }
 
   // Empêche les redirections ouvertes : "next" doit être un chemin local.
-  const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard"
+  const safeNext = safeNextPath(next) ?? "/dashboard"
 
-  return NextResponse.redirect(`${origin}${safeNext}`)
+  return NextResponse.redirect(`${appUrl}${safeNext}`)
 }

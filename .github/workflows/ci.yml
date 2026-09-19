@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   ci:
     name: Lint, typecheck, test & build
@@ -28,6 +31,10 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Audit dependencies
+        run: pnpm audit --audit-level=moderate
+        continue-on-error: true
 
       - name: Lint
         run: pnpm lint
@@ -99,6 +106,34 @@ jobs:
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/saas_starter_test
 
+      - name: Run email outbox tests (file, idempotence, retry, security)
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f tests/db/email-outbox-tests.sql
+          echo "::notice::Email outbox tests passed (queue, idempotence, retry, RLS, service_role)"
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/saas_starter_test
+
+      - name: Run notifications tests (catalogue, ownership, preferences, security)
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f tests/db/notifications-tests.sql
+          echo "::notice::Notifications tests passed (templates, ownership, RLS, service_role)"
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/saas_starter_test
+
+      - name: Run storage tests (buckets, paths, isolation, security)
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f tests/db/storage-tests.sql
+          echo "::notice::Storage tests passed (buckets, path integrity, RLS isolation, service_role only)"
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/saas_starter_test
+
+      - name: Run jobs foundation tests (queue, idempotence, retry, delayed, failed, logs, cron, security)
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f tests/db/jobs-foundation-tests.sql
+          echo "::notice::Jobs foundation tests passed (queue, idempotence, retry, delayed, max attempts, cancel, logs, cron, RLS, service_role)"
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/saas_starter_test
+
       - name: Verify schema objects
         run: |
           echo "Tables in public schema:"
@@ -113,5 +148,14 @@ jobs:
           echo "RLS enabled on billing tables:"
           psql "$DATABASE_URL" -At -c \
             "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename IN ('plans','features','plan_features','plan_limits','subscriptions','usage','usage_events') ORDER BY tablename;"
+          echo "RLS enabled on notifications/storage tables:"
+          psql "$DATABASE_URL" -At -c \
+            "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename IN ('email_outbox','notification_templates','notification_preferences','notifications','storage_files') ORDER BY tablename;"
+          echo "RLS enabled on jobs/cron tables:"
+          psql "$DATABASE_URL" -At -c \
+            "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename IN ('jobs','job_logs','cron_tasks','cron_executions') ORDER BY tablename;"
+          echo "Storage buckets:"
+          psql "$DATABASE_URL" -At -c \
+            "SELECT id || ':' || public FROM storage.buckets ORDER BY id;"
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/saas_starter_test

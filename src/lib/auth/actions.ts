@@ -6,7 +6,6 @@ import { redirect } from "next/navigation"
 import { isSupabaseConfigured } from "@/lib/supabase/env"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { getFirstErrorMessage } from "@/lib/validation"
-import { getSignUpErrorMessage } from "@/lib/auth/messages"
 import {
   forgotPasswordSchema,
   loginSchema,
@@ -14,8 +13,9 @@ import {
   signUpSchema,
 } from "@/lib/auth/schemas"
 import { assertRateLimit, RateLimitError } from "@/lib/rate-limit/guard"
-import { clientIpFromHeaders } from "@/lib/rate-limit/keys"
+import { clientIpFromHeaders, type HeadersLike } from "@/lib/rate-limit/keys"
 import { rateLimitPresets } from "@/lib/rate-limit/config"
+import { safeNextPath, getBaseUrlFromHeaders } from "@/lib/url"
 
 export type AuthResult = {
   error?: string
@@ -23,13 +23,6 @@ export type AuthResult = {
 }
 
 export type AuthState = AuthResult | null
-
-/** Store des headers (compatible `next/headers`, `Headers`, etc.). */
-type HeadersLike = { get(name: string): string | null | undefined }
-
-function getBaseUrl(headerStore: HeadersLike): string {
-  return headerStore.get("origin") ?? "http://localhost:3000"
-}
 
 /**
  * Rate limiting des actions auth (protection brute force), par IP.
@@ -93,7 +86,10 @@ export async function login(
     return { error: "Identifiants incorrects. Vérifie tes informations." }
   }
 
-  redirect("/dashboard")
+  // "next" est un chemin LOCAL (garde anti-open-redirect) : il permet de
+  // revenir à la page voulue après connexion (ex. accepter une invitation).
+  const pendingNext = String(formData.get("next") ?? "")
+  redirect(safeNextPath(pendingNext) ?? "/dashboard")
 }
 
 export async function signUp(
@@ -125,7 +121,7 @@ export async function signUp(
   })
 
   if (error) {
-    return { error: getSignUpErrorMessage(error) }
+    return { error: "Impossible de créer le compte. Vérifie tes informations." }
   }
 
   // Certains projets Supabase exigent une confirmation par email.
@@ -162,7 +158,7 @@ export async function forgotPassword(
   if (limited) return limited
 
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${getBaseUrl(headerStore)}/reset-password`,
+    redirectTo: `${getBaseUrlFromHeaders(headerStore)}/reset-password`,
   })
 
   if (error) {
@@ -190,7 +186,7 @@ export async function resetPassword(
     return { error: getFirstErrorMessage(parsed) ?? "Données invalides." }
   }
 
-  const supabase = await createSupabaseServerClient()
+  const supabase = await getClient()
   if (!supabase) {
     return { error: "Supabase n'est pas configuré sur ce projet." }
   }
@@ -213,7 +209,10 @@ export async function resetPassword(
 export async function signOut(): Promise<void> {
   const supabase = await createSupabaseServerClient()
   if (supabase) {
-    await supabase.auth.signOut()
+    const { error } = await supabase.auth.signOut()
+    if (error) {
+      console.error("[auth/signOut]", error.message)
+    }
   }
   redirect("/login")
 }

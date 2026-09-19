@@ -7,22 +7,9 @@ type AuthErrorInput = {
 /**
  * Traduit une erreur `supabase.auth.signUp` en message utilisateur français.
  *
- * Ne reflète jamais le message brut (anglais, détails techniques) vers l'UI :
- * les identifiants inconnus retombent sur un message générique sûr.
+ * Ne reflète jamais le message brut (anglais, détails techniques) vers l'UI.
+ * Retourne toujours le même message pour éviter l'enumeration de comptes.
  */
-export function getSignUpErrorMessage(error: AuthErrorInput): string {
-  const message = (error.message ?? "").toLowerCase()
-  const code = (error.code ?? "").toLowerCase()
-
-  const alreadyRegistered =
-    code === "email_exists" ||
-    code === "user_already_exists" ||
-    message.includes("already registered") ||
-    message.includes("already exists")
-
-  if (alreadyRegistered) {
-    return "Un compte existe déjà avec cette adresse email."
-  }
-
-  return "Une erreur est survenue lors de l'inscription. Réessaie."
+export function getSignUpErrorMessage(_error: AuthErrorInput): string {
+  return "Si un compte existe déjà avec cette adresse, un email de confirmation a été envoyé."
 }
