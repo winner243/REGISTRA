@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState, useState, type FormEvent } from "react"
+import { useActionState, useState, type FormEvent, startTransition } from "react"
 import Link from "next/link"
 
 import { login, type AuthResult } from "@/lib/auth/actions"
@@ -40,7 +40,9 @@ export function LoginForm({ next }: { next?: string }) {
     if (next) {
       formData.set("next", next)
     }
-    formAction(formData)
+    startTransition(() => {
+      formAction(formData)
+    })
   }
 
   const error = state?.error ?? clientError

@@ -157,7 +157,8 @@ select public._test_expect_sqlstate(
           values (%L, %L, %L, %L, %L, %L, %L)',
     :'store_a_id'::uuid, 'saas_hacker',
     'orgs/' || :'store_a_id'::uuid || '/x.bin',
-    'x.bin', 'application/octet-stream', 10, repeat('d', 64))
+    'x.bin', 'application/octet-stream', 10, repeat('d', 64)),
+  '23514'
 );
 
 select public._test_expect_sqlstate(
@@ -166,7 +167,8 @@ select public._test_expect_sqlstate(
           values (%L, %L, %L, %L, %L, %L, %L)',
     :'store_a_id'::uuid, 'saas_private',
     'orgs/' || :'store_a_id'::uuid || '/x.bin',
-    'x.bin', 'application/octet-stream', 10, 'zztop')
+    'x.bin', 'application/octet-stream', 10, 'zztop'),
+  '23514'
 );
 
 -- =============================================================================
@@ -277,14 +279,14 @@ select public._test_assert(
   (select count(*) from pg_tables t
     where t.schemaname = 'public'
       and t.tablename = 'storage_files'
-      and t.relrowsecurity) = 1,
+      and t.rowsecurity) = 1,
   'RLS doit être activé sur public.storage_files'
 );
 select public._test_assert(
   (select count(*) from pg_tables t
     where t.schemaname = 'storage'
       and t.tablename = 'objects'
-      and t.relrowsecurity) = 1,
+      and t.rowsecurity) = 1,
   'RLS doit être activé sur storage.objects (aucun accès client direct)'
 );
 select public._test_assert(

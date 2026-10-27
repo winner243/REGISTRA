@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import type { User } from "@supabase/supabase-js"
+import { listUserOrganizations } from "@/lib/orgs"
 
 export async function getCurrentUser(): Promise<User | null> {
   const supabase = await createSupabaseServerClient()
@@ -26,4 +27,10 @@ export async function requireUser(): Promise<User> {
 
 export async function isAuthenticated(): Promise<boolean> {
   return (await getCurrentUser()) !== null
+}
+
+export async function useOrganizations(): Promise<{ id: string; name: string }[]> {
+  const user = await getCurrentUser()
+  const organizations = await listUserOrganizations()
+  return organizations
 }

@@ -263,6 +263,10 @@ update public.notification_preferences
    set enabled = true
  where user_id = '00000000-0000-0000-0000-000000000001';
 
+--    Preuve côté propriétaire (alice) : la préférence n'a pas changé.
+select set_config('request.jwt.claim.sub',
+  '00000000-0000-0000-0000-000000000001', false);
+
 select public._test_assert(
   (select count(*) from public.notification_preferences p
     where p.user_id = '00000000-0000-0000-0000-000000000001'
@@ -306,13 +310,14 @@ reset role;
 set role anon;
 select set_config('request.jwt.claim.sub', '', false);
 
-select public._test_assert(
-  (select count(*) from public.notifications) = 0,
-  'anon ne doit voir AUCUNE notification'
+--    Lecture anon impossible : ACL révoquée par la migration (côté serveur
+--    strict). L'intention est vérifiée sous sa forme la plus forte : la lecture
+--    est explicitement refusée (SQLSTATE 42501) au lieu de renvoyer 0 ligne.
+select public._test_expect_denied(
+  'select count(*) from public.notifications'
 );
-select public._test_assert(
-  (select count(*) from public.notification_preferences) = 0,
-  'anon ne doit voir AUCUNE préférence'
+select public._test_expect_denied(
+  'select count(*) from public.notification_preferences'
 );
 select public._test_expect_denied(
   'select public.mark_notifications_read(array[null]::uuid[])'
@@ -327,7 +332,7 @@ select public._test_assert(
   (select count(*) from pg_tables t
     where t.schemaname = 'public'
       and t.tablename in ('notification_templates', 'notification_preferences', 'notifications')
-      and t.relrowsecurity) = 3,
+      and t.rowsecurity) = 3,
   'RLS doit être activé sur les trois tables de notifications'
 );
 

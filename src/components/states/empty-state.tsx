@@ -25,7 +25,7 @@ function StateButton({ action }: { action: StateAction }) {
 
   if (href) {
     return (
-      <Button variant={variant} render={<Link href={href} />}>
+      <Button variant={variant} nativeButton={false} render={<Link href={href} />}>
         {label}
       </Button>
     )

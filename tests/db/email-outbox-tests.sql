@@ -174,9 +174,12 @@ set role authenticated;
 select set_config('request.jwt.claim.sub',
   '00000000-0000-0000-0000-000000000001', false);
 
-select public._test_assert(
-  (select count(*) from public.email_outbox) = 0,
-  'authenticated ne doit voir AUCUNE ligne de la file outbox'
+--    Lecture client impossible : ACL révoquée (revoke all) + aucune policy.
+--    L'intention « authenticated ne doit voir AUCUNE ligne de la file outbox »
+--    est vérifiée sous sa forme la plus forte : la lecture est explicitement
+--    refusée (SQLSTATE 42501) au lieu de renvoyer 0 ligne.
+select public._test_expect_denied(
+  'select count(*) from public.email_outbox'
 );
 
 --    Ni écriture, ni exécution des fonctions réservées à service_role.
@@ -204,9 +207,9 @@ reset role;
 set role anon;
 select set_config('request.jwt.claim.sub', '', false);
 
-select public._test_assert(
-  (select count(*) from public.email_outbox) = 0,
-  'anon ne doit voir AUCUNE ligne de la file outbox'
+--    Idem pour anon : lecture explicitement refusée (ACL révoquée, aucune policy).
+select public._test_expect_denied(
+  'select count(*) from public.email_outbox'
 );
 
 -- =============================================================================
@@ -218,7 +221,7 @@ select public._test_assert(
   (select count(*) from pg_tables t
     where t.schemaname = 'public'
       and t.tablename = 'email_outbox'
-      and t.relrowsecurity) = 1,
+      and t.rowsecurity) = 1,
   'RLS doit être activé sur email_outbox'
 );
 

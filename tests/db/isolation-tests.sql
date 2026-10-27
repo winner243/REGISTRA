@@ -513,7 +513,7 @@ select public._test_assert(
         'profiles', 'organizations', 'memberships', 'invitations',
         'roles', 'permissions', 'role_permissions'
       )
-      and t.relrowsecurity) = 7,
+      and t.rowsecurity) = 7,
   'RLS doit être activé sur les 7 tables de fondation'
 );
 

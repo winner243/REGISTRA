@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState, useEffect, useState, type FormEvent } from "react"
+import { useActionState, useEffect, useState, type FormEvent, startTransition } from "react"
 import Link from "next/link"
 
 import { resetPassword, type AuthResult } from "@/lib/auth/actions"
@@ -68,7 +68,9 @@ export function ResetPasswordForm() {
     const formData = new FormData()
     formData.set("password", password)
     formData.set("confirmPassword", confirmPassword)
-    formAction(formData)
+    startTransition(() => {
+      formAction(formData)
+    })
   }
 
   const error = state?.error ?? clientError
@@ -92,7 +94,7 @@ export function ResetPasswordForm() {
           <Alert className="py-2.5">
             <AlertDescription>{success}</AlertDescription>
           </Alert>
-          <Button render={<Link href="/login" />}>Se connecter</Button>
+          <Button nativeButton={false} render={<Link href="/login" />}>Se connecter</Button>
         </div>
       ) : !checkedSession ? (
         <p className="text-sm text-muted-foreground">
@@ -106,7 +108,7 @@ export function ResetPasswordForm() {
               lien depuis la page de récupération.
             </AlertDescription>
           </Alert>
-          <Button render={<Link href="/forgot-password" />}>
+          <Button nativeButton={false} render={<Link href="/forgot-password" />}>
             Mot de passe oublié ?
           </Button>
         </div>

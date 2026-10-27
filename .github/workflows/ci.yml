@@ -99,6 +99,13 @@ jobs:
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/saas_starter_test
 
+      - name: Run Registra tests (seeds, RLS, isolation Org A/B, RPC security)
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f tests/db/registra-tests.sql
+          echo "::notice::Registra tests passed (owner/member/cross-org + read RPC permission guards)"
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/saas_starter_test
+
       - name: Run billing engine tests (plans, entitlements, limits, usage, security)
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f tests/db/billing-tests.sql
@@ -148,6 +155,9 @@ jobs:
           echo "RLS enabled on billing tables:"
           psql "$DATABASE_URL" -At -c \
             "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename IN ('plans','features','plan_features','plan_limits','subscriptions','usage','usage_events') ORDER BY tablename;"
+          echo "RLS enabled on Registra tables:"
+          psql "$DATABASE_URL" -At -c \
+            "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename IN ('organization_registra_settings','groups','persons','attendance_records') ORDER BY tablename;"
           echo "RLS enabled on notifications/storage tables:"
           psql "$DATABASE_URL" -At -c \
             "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename IN ('email_outbox','notification_templates','notification_preferences','notifications','storage_files') ORDER BY tablename;"

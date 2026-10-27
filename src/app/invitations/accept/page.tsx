@@ -27,7 +27,7 @@ function InvitationResult({
         {message}
       </div>
       <div className="flex gap-3">
-        <Button variant="outline" render={<Link href="/dashboard" />}>
+        <Button variant="outline" nativeButton={false} render={<Link href="/dashboard" />}>
           Retour au tableau de bord
         </Button>
       </div>

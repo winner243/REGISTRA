@@ -57,7 +57,7 @@ export function Navbar({
                 )
               }
               return (
-                <Button key={item.label} variant="ghost" size="sm" render={<Link href={item.href} />}>
+                <Button key={item.label} variant="ghost" size="sm" nativeButton={false} render={<Link href={item.href} />}>
                   {item.label}
                 </Button>
               )

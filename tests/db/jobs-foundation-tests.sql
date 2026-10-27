@@ -257,7 +257,7 @@ select public._test_assert(
 -- =============================================================================
 reset role;
 set role authenticated;
-set config 'request.jwt.claim.sub' = '00000000-0000-0000-0000-000000000001';
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000001', false);
 
 select public._test_assert(
   (select count(*) from public.cron_tasks) >= 1,
@@ -282,7 +282,7 @@ reset role;
 -- =============================================================================
 -- 11. Cron executions — mark_cron_execution
 -- =============================================================================
-select public.mark_cron_execution('email-outbox', 'success', '00000000-0000-0000-0000-000000000001', null, 123);
+select public.mark_cron_execution('email-outbox', 'success', null, null, 123);
 select public._test_assert(
   (select count(*) from public.cron_executions where task_name = 'email-outbox' and status = 'success') = 1,
   'mark_cron_execution enregistre succès'
@@ -293,19 +293,16 @@ select public._test_assert(
 -- =============================================================================
 reset role;
 set role authenticated;
-set config 'request.jwt.claim.sub' = '00000000-0000-0000-0000-000000000001';
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000001', false);
 
-select public._test_assert(
-  (select count(*) from public.jobs) = 0,
-  'authenticated ne voit AUCUN job'
+select public._test_expect_denied(
+  'select count(*) from public.jobs'
 );
-select public._test_assert(
-  (select count(*) from public.job_logs) = 0,
-  'authenticated ne voit AUCUN log'
+select public._test_expect_denied(
+  'select count(*) from public.job_logs'
 );
-select public._test_assert(
-  (select count(*) from public.cron_executions) = 0,
-  'authenticated ne voit AUCUNE exécution cron'
+select public._test_expect_denied(
+  'select count(*) from public.cron_executions'
 );
 
 -- Fonctions interdites
@@ -318,15 +315,16 @@ select public._test_expect_denied('select public.log_job_transition(''00000000-0
 
 reset role;
 set role anon;
-set config 'request.jwt.claim.sub' = '';
+select set_config('request.jwt.claim.sub', '', false);
 
-select public._test_assert(
-  (select count(*) from public.jobs) = 0,
-  'anon ne voit AUCUN job'
+select public._test_expect_denied(
+  'select count(*) from public.jobs'
 );
-select public._test_assert(
-  (select count(*) from public.cron_tasks) >= 1,
-  'anon PEUT lire le catalogue cron_tasks (public)'
+--    Durcissement 20260918 (security_hardening) : la lecture du catalogue
+--    cron_tasks est r�serv�e � authenticated (plus de anon). L'assertion
+--    historique "anon PEUT lire" est donc devenue : anon ne PEUT PAS lire.
+select public._test_expect_denied(
+  'select count(*) from public.cron_tasks'
 );
 
 reset role;

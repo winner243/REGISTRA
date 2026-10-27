@@ -29,7 +29,7 @@ create table public.cron_tasks (
   description       text not null check (length(btrim(description)) between 1 and 500),
   queue_name        public.job_queue_name not null,
   schedule          text not null check (schedule ~ '^(@(annually|yearly|monthly|weekly|daily|hourly)|([0-9*,\-\/]+\s+){4,5}[0-9*,\-\/]+)$'),
-  timezone          text not null default 'UTC' check (timezone ~ '^[A-Za-z0-9_+\-]+/[A-Za-z0-9_+\-]+$'),
+  timezone          text not null default 'UTC' check (timezone ~ '^[A-Za-z0-9_+\-]+(/[A-Za-z0-9_+\-]+)*$'),
   payload           jsonb not null default '{}'::jsonb,
   enabled           boolean not null default true,
   last_run_at       timestamptz,

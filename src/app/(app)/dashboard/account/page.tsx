@@ -90,7 +90,7 @@ export default async function AccountPage() {
       </Card>
 
       <div>
-        <Button variant="ghost" render={<Link href="/forgot-password" />}>
+        <Button variant="ghost" nativeButton={false} render={<Link href="/forgot-password" />}>
           Réinitialiser le mot de passe
         </Button>
       </div>

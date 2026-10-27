@@ -82,7 +82,7 @@ export default async function TeamPage() {
               Vous n&apos;appartenez pas encore à une organisation. Acceptez une
               invitation pour apparaître ici.
             </p>
-            <Button render={<Link href="/dashboard" />}>
+            <Button nativeButton={false} render={<Link href="/dashboard" />}>
               Retour au tableau de bord
             </Button>
           </CardContent>

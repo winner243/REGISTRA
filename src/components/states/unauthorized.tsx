@@ -44,7 +44,7 @@ export function Unauthorized({
             {description}
           </p>
         </div>
-        <Button render={<Link href={backHref} />}>{backLabel}</Button>
+        <Button nativeButton={false} render={<Link href={backHref} />}>{backLabel}</Button>
       </div>
     </main>
   )

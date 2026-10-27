@@ -74,8 +74,18 @@ on conflict (id) do nothing;
 --    liste depuis le navigateur). Le serveur (`service_role`) reste le seul
 --    chemin : upload validé, signed URL de lecture, suppression autorisée.
 --    Sur un vrai projet Supabase, RLS est déjà activé : cette instruction est
---    un no-op de sécurité (idempotent).
-alter table storage.objects enable row level security;
+--    un no-op de sécurité (idempotent). Elle est conditionnée à la propriété
+--    de la table : sur un vrai projet, `storage.objects` appartient à
+--    `supabase_storage_admin` (un ALTER par `postgres` échouerait en 42501).
+do $$
+begin
+  if to_regclass('storage.objects') is not null
+     and pg_get_userbyid(
+           (select relowner from pg_class where oid = to_regclass('storage.objects'))
+         ) = current_user then
+    execute 'alter table storage.objects enable row level security';
+  end if;
+end $$;
 
 -- 4. Métadonnées de fichiers (ownership + autorisation applicative).
 create table public.storage_files (

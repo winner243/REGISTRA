@@ -44,10 +44,10 @@ export default function Home() {
             produit.
           </p>
           <div className="flex w-full max-w-xs flex-col gap-3 sm:w-auto sm:max-w-none sm:flex-row">
-            <Button size="lg" render={<Link href="/dashboard" />}>
+            <Button size="lg" nativeButton={false} render={<Link href="/dashboard" />}>
               Commencer
             </Button>
-            <Button size="lg" variant="outline" render={<Link href="/pricing" />}>
+            <Button size="lg" variant="outline" nativeButton={false} render={<Link href="/pricing" />}>
               Voir la tarification
             </Button>
           </div>
@@ -91,10 +91,10 @@ export default function Home() {
             Créez votre compte et explorez un dashboard complet dès maintenant.
           </p>
           <div className="flex w-full max-w-xs flex-col gap-3 sm:w-auto sm:max-w-none sm:flex-row">
-            <Button size="lg" render={<Link href="/register" />}>
+            <Button size="lg" nativeButton={false} render={<Link href="/register" />}>
               Créer un compte
             </Button>
-            <Button size="lg" variant="outline" render={<Link href="/login" />}>
+            <Button size="lg" variant="outline" nativeButton={false} render={<Link href="/login" />}>
               Se connecter
             </Button>
           </div>

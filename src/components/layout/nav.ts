@@ -1,16 +1,5 @@
 import type { LucideIcon } from "lucide-react"
-import {
-  LayoutDashboard,
-  Folder,
-  Users,
-  UsersRound,
-  BarChart3,
-  Settings,
-  CreditCard,
-  CircleUser,
-  IdCard,
-  Bell,
-} from "lucide-react"
+import { LayoutDashboard, Layers, History, BarChart3, Upload } from "lucide-react"
 
 export type NavItem = {
   label: string
@@ -28,15 +17,18 @@ export const mainNav: NavItem[] = [
   { label: "Documentation" },
 ]
 
+/**
+ * Navigation de l'application, réduite au périmètre du MVP Registra :
+ * établissement → groupe → membres/feuille de présence → historique/stats → import/export.
+ *
+ * Les pages du Starter hors périmètre (Équipe, Notifications, Paramètres,
+ * Facturation, Compte, Profil…) restent accessibles par leurs routes mais ne
+ * sont pas exposées dans le menu (décision MVP : masquer, sans supprimer).
+ */
 export const sidebarNav: NavItem[] = [
   { label: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard, exact: true },
-  { label: "Projets", icon: Folder },
-  { label: "Clients", icon: Users },
-  { label: "Équipe", href: "/dashboard/team", icon: UsersRound },
-  { label: "Notifications", href: "/dashboard/notifications", icon: Bell },
-  { label: "Statistiques", icon: BarChart3 },
-  { label: "Paramètres", href: "/dashboard/settings", icon: Settings },
-  { label: "Facturation", href: "/dashboard/billing", icon: CreditCard },
-  { label: "Compte", href: "/dashboard/account", icon: CircleUser },
-  { label: "Profil", href: "/dashboard/profile", icon: IdCard },
+  { label: "Groupes", href: "/dashboard/groups", icon: Layers },
+  { label: "Historique", href: "/dashboard/group-history", icon: History },
+  { label: "Statistiques", href: "/dashboard/stats", icon: BarChart3 },
+  { label: "Import / Export", href: "/dashboard/imports", icon: Upload },
 ]

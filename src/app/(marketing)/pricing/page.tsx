@@ -94,7 +94,7 @@ export default function PricingPage() {
               <Button
                 className="w-full"
                 variant={plan.highlighted ? "default" : "outline"}
-                render={<Link href="/register" />}
+                nativeButton={false} render={<Link href="/register" />}
               >
                 Commencer
               </Button>

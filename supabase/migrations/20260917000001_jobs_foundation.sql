@@ -89,9 +89,12 @@ create index jobs_due_idx
   where status in ('pending', 'failed');
 
 --    Index pour les delayed jobs (scheduled_at futur)
+--    Prédicat IMMUTABLE obligatoire (un `now()` dans un index partiel est
+--    rejeté par PostgreSQL : SQLSTATE 42P17). Le filtre temporel reste dans la
+--    requête de claim (`scheduled_at <= now()`), pas dans l'index.
 create index jobs_scheduled_idx
   on public.jobs (queue_name, scheduled_at)
-  where status = 'pending' and scheduled_at > now();
+  where status = 'pending';
 
 -- 3. Timestamps maintenus par le serveur (fonction existante `handle_updated_at`)
 create trigger handle_jobs_updated_at

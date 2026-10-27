@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState, useEffect, useState, type FormEvent } from "react"
+import { useActionState, useEffect, useState, type FormEvent, startTransition } from "react"
 import Link from "next/link"
 
 import { signUp, type AuthResult } from "@/lib/auth/actions"
@@ -48,7 +48,9 @@ export function RegisterForm() {
     formData.set("email", email)
     formData.set("password", password)
     formData.set("confirmPassword", confirmPassword)
-    formAction(formData)
+    startTransition(() => {
+      formAction(formData)
+    })
   }
 
   const error = state?.error ?? clientError

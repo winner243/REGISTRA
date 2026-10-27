@@ -24,7 +24,7 @@ export function MarketingNav() {
         rightSlot={
           <Button
             className="hidden md:inline-flex"
-            render={<Link href="/login" />}
+            nativeButton={false} render={<Link href="/login" />}
           >
             Se connecter
           </Button>
@@ -62,7 +62,7 @@ export function MarketingNav() {
             })}
           </nav>
           <div className="mt-auto">
-            <Button className="w-full" render={<Link href="/login" />}>
+            <Button className="w-full" nativeButton={false} render={<Link href="/login" />}>
               Se connecter
             </Button>
           </div>
