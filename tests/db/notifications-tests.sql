@@ -136,10 +136,9 @@ select public._test_assert(
   :'notif_a_n1' is not null,
   'create_notification doit retourner l''id de la notification'
 );
---    RLS : restaurer l'UID du destinataire pour que la policy
---    notifications_select_own (user_id = auth.uid()) voie la ligne.
-select set_config('request.jwt.claim.sub',
-  '00000000-0000-0000-0000-000000000001', false);
+--    RESET ROLE redevient postgres (superuser, bypass RLS) pour vérifier
+--    la ligne insérée par create_notification (security definer).
+reset role;
 select public._test_assert(
   (select count(*) from public.notifications n
     where n.id = :'notif_a_n1'::uuid
@@ -149,6 +148,7 @@ select public._test_assert(
       and n.read_at is null) = 1,
   'create_notification doit insérer une ligne non lue pour le destinataire'
 );
+set role service_role;
 
 --    Type inconnu / in_app non autorisé → refus (42501), aucune ligne créée.
 select public._test_expect_sqlstate(
