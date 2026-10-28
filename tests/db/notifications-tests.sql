@@ -136,6 +136,10 @@ select public._test_assert(
   :'notif_a_n1' is not null,
   'create_notification doit retourner l''id de la notification'
 );
+--    RLS : restaurer l'UID du destinataire pour que la policy
+--    notifications_select_own (user_id = auth.uid()) voie la ligne.
+select set_config('request.jwt.claim.sub',
+  '00000000-0000-0000-0000-000000000001', false);
 select public._test_assert(
   (select count(*) from public.notifications n
     where n.id = :'notif_a_n1'::uuid
