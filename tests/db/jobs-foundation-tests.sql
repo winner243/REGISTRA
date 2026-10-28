@@ -77,12 +77,10 @@ select public._test_assert(
 -- =============================================================================
 -- 2. Idempotence — même (queue_name, idempotency_key) → NULL
 -- =============================================================================
-select public.queue_job(
-  'exports', 'export-1', '{"exportId":"export-1","format":"json"}'::jsonb, 3, now()
-) as job_q2 \gset
-
 select public._test_assert(
-  :'job_q2' is null,
+  public.queue_job(
+    'exports', 'export-1', '{"exportId":"export-1","format":"json"}'::jsonb, 3, now()
+  ) is null,
   're-queue du même (queue_name, idempotency_key) doit retourner NULL'
 );
 select public._test_assert(
