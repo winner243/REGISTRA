@@ -78,14 +78,12 @@ select public._test_assert(
 -- =============================================================================
 -- 2. Idempotence — même (type, reference_id) → NULL, aucun doublon
 -- =============================================================================
-select public.queue_email(
-  'invitation', 'token-1', 'alice@example.com',
-  'Invitation bis', '<p>bis</p>', 'bis',
-  '{}'::jsonb
-) as outbox_q2 \gset
-
 select public._test_assert(
-  :'outbox_q2' is null,
+  public.queue_email(
+    'invitation', 'token-1', 'alice@example.com',
+    'Invitation bis', '<p>bis</p>', 'bis',
+    '{}'::jsonb
+  ) is null,
   're-queue du même (type, reference_id) doit retourner NULL'
 );
 select public._test_assert(
