@@ -169,6 +169,7 @@ select public._test_assert(
   :'notif_org_count'::integer = 2,
   'notify_organization_members doit créer une ligne pour chaque membre (2)'
 );
+reset role;
 select public._test_assert(
   (select count(*) from public.notifications n
     where n.organization_id = :'notif_a_id'::uuid
